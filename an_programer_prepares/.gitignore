@@ -1,0 +1,15 @@
+.*
+!.gitignore
+*.o
+ImageSection
+SpecialSymbol
+ManualNameMangling
+WeakReference
+pthread
+pthread_mul
+ab
+HelloWorld
+TinyHelloWorld
+target
+SectionMapping
+HeapSize

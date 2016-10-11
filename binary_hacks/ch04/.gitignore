@@ -6,7 +6,6 @@ fortify_bar
 fortify_baz
 fortify_foo
 int_min
-Makefile
 my_atoi
 my_printf
 null

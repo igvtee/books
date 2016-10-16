@@ -1,6 +1,7 @@
 .*
 !.gitignore
 *.o
+*.so
 ImageSection
 SpecialSymbol
 ManualNameMangling
@@ -13,3 +14,9 @@ TinyHelloWorld
 target
 SectionMapping
 HeapSize
+Program1
+Program2
+RunSo
+RunSoSimple
+StackDump
+main

@@ -1,18 +1,22 @@
 CFLAGS=-m32 -fno-stack-protector
 CXXFLAGS=-m32
-LDFLAGS=
+MYLDFLAGS=-Wl,-rpath,'$$ORIGIN' -Wl,-rpath-link,'./'
 OBJS=SimpleSection.o CustonSection.o WeakSymbol.o
+LIBS=Lib.so pic.so
 EXECS=ImageSection SpecialSymbol ManualNameMangling WeakReference pthread \
       pthread_mul ab HelloWorld TinyHelloWorld target SectionMapping \
-      HeapSize
+      HeapSize Program1 Program2 StackDump main RunSoSimple RunSo
 
-all: $(OBJS) $(EXECS)
+all: $(OBJS) $(LIBS) $(EXECS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<
 
 %: %.o
 	$(CC) $< -o $@
+
+%.so: %.c
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
 
 ImageSection: ImageSection.c
 	objcopy -I binary -O elf32-i386 -B i386 ImageSection.c ImageSource.o
@@ -40,6 +44,21 @@ target: target.c
 SectionMapping: SectionMapping.c
 	$(CC) $(CFLAGS) -static $< -o $@
 
+Program%: Program%.c Lib.so
+	$(CC) $(CFLAGS) ./Lib.so -o $@ $<
+
+main: main.c b1.c b2.c a1.so a2.so
+	$(CC) $(CFLAGS) $(MYLDFLAGS) -fPIC -shared -o b1.so b1.c a1.so
+	$(CC) $(CFLAGS) $(MYLDFLAGS) -fPIC -shared -o b2.so b2.c a2.so
+	$(CC) $(CFLAGS) $(MYLDFLAGS) $< b1.so b2.so -o $@
+
+RunSoSimple: RunSoSimple.c
+	$(CC) $(CFLAGS) -ldl $< -o $@
+
+RunSo: RunSo.c
+	$(CC) $(CFLAGS) -ldl $< -o $@
+
 .PHONY: clean
 clean:
-	rm -f $(OBJS) $(EXECS) *.o
+	rm -f $(OBJS) $(LIBS) $(EXECS) *.o *.so
+

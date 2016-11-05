@@ -6,7 +6,7 @@ LIBS=Lib.so pic.so lib.so
 EXECS=ImageSection SpecialSymbol ManualNameMangling WeakReference pthread \
       pthread_mul ab HelloWorld TinyHelloWorld target SectionMapping \
       HeapSize Program1 Program2 StackDump main RunSoSimple RunSo main_ver \
-      stack fastcall big_thing big_thing_cxx
+      stack fastcall big_thing big_thing_cxx longjmp fork sysenter
 
 all: $(OBJS) $(LIBS) $(EXECS)
 

@@ -1,5 +1,6 @@
 .*
 !.gitignore
+*.a
 *.o
 *.so
 ImageSection
@@ -25,3 +26,6 @@ big_thing_cxx
 fastcall
 main_ver
 stack
+fork
+longjmp
+sysenter

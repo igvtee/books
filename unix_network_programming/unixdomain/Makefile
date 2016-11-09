@@ -1,7 +1,8 @@
 include ../Make.defines
 
 PROGS =	daytimetcpcli daytimetcpsrv2 mycat openfile \
-	tfcred01 unixbind unixstrcli01 unixstrserv01 unixstrserv02
+	unixbind unixstrcli01 unixstrserv01 unixstrserv02 \
+	unixdgcli01 unixdgserv01
 
 all:	${PROGS}
 
@@ -35,9 +36,9 @@ unixstrcli01:	unixstrcli01.o
 unixstrserv01:	unixstrserv01.o sigchldwaitpid.o
 		${CC} ${CFLAGS} -o $@ unixstrserv01.o sigchldwaitpid.o ${LIBS}
 
-unixstrserv02:	unixstrserv02.o strecho.o sigchldwaitpid.o readcred.o
-		${CC} ${CFLAGS} -o $@ unixstrserv02.o strecho.o sigchldwaitpid.o \
-				readcred.o ${LIBS}
+unixstrserv02:	unixstrserv02.o strechoncred.o sigchldwaitpid.o readucred.o
+		${CC} ${CFLAGS} -o $@ unixstrserv02.o strechoncred.o sigchldwaitpid.o \
+				readucred.o ${LIBS}
 
 clean:
 		rm -f ${PROGS} ${CLEANFILES}

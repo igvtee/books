@@ -3,13 +3,16 @@
 int
 main(int argc, char **argv)
 {
-	int					listenfd, connfd;
+	int listenfd, connfd, on;
 	pid_t				childpid;
 	socklen_t			clilen;
 	struct sockaddr_un	cliaddr, servaddr;
 	void				sig_chld(int);
 
 	listenfd = Socket(AF_LOCAL, SOCK_STREAM, 0);
+	/* must set the socket option on the *receiving* socket */
+	on = 1;
+	Setsockopt(listenfd, SOL_SOCKET, SO_PASSCRED, &on, sizeof(on));
 
 	unlink(UNIXSTR_PATH);
 	bzero(&servaddr, sizeof(servaddr));

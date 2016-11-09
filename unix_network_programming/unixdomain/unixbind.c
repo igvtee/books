@@ -22,6 +22,11 @@ main(int argc, char **argv)
 	len = sizeof(addr2);
 	Getsockname(sockfd, (SA *) &addr2, &len);
 	printf("bound name = %s, returned len = %d\n", addr2.sun_path, len);
-	
+	printf("sockaddr_un size = %zd, no sun_path size = %zd, family size = %zd\n",
+			sizeof(addr1), sizeof(addr1) - sizeof(addr1.sun_path),
+			sizeof(addr1.sun_family));
+	printf("SUN_LEN = %zd, sun_path = %zd\n", SUN_LEN(&addr1),
+			strlen(addr1.sun_path));
+
 	exit(0);
 }

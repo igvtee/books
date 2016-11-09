@@ -3,6 +3,7 @@
 *.a
 *.o
 *.so
+cscope.*
 Make.defines
 Makefile
 config.h

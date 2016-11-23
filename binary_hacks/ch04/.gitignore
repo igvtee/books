@@ -12,3 +12,15 @@ null
 overf
 testflap
 tst
+async_signal_unsafe
+non_volatile
+sigsafe01
+sigsafe02
+sigsafe03
+sigsafe04
+sigsafe05
+sigsafe06
+sigwait
+valgrind_test1
+data_race
+horrible

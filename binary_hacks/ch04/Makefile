@@ -1,9 +1,12 @@
 #CFLAGS=-Wall -Wextra -Wformat=2 -Wstrict-aliasing=2 -Wcast-qual -Wcast-align \
 	-Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith -Wswitch-enum
+CFLAGS=-g
 
 export LC_MESSAGES=C
 EXECS = alias my_printf double_free my_atoi int_min testflap fortify_foo \
-	fortify_bar fortify_baz overf bitmask bitmask_m32 tst null
+	fortify_bar fortify_baz overf bitmask bitmask_m32 tst null \
+	async_signal_unsafe non_volatile sigwait sigsafe01 sigsafe02 sigsafe03 \
+	sigsafe04 sigsafe05 sigsafe06 valgrind_test1 horrible data_race
 
 all: $(EXECS)
 
@@ -37,6 +40,25 @@ overf: overf.c
 bitmask_m32: bitmask.c
 	$(CC) $(CFLAGS) -m32 -o $@ $<
 
+async_signal_unsafe: async_signal_unsafe.c
+	$(CC) $(CFLAGS) -lpthread -o $@ $<
+
+non_volatile: non_volatile.c
+	$(CC) $(CFLAGS) -O2 -o $@ $<
+
+sigwait: sigwait.c
+	$(CC) $(CFLAGS) -O2 -lpthread -o $@ $<
+
+sigsafe06: sigsafe06.c
+	$(CC) $(CFLAGS) -I./sigsafe-0.1.3/src -L./sigsafe-0.1.3/build-x86_64-linux-st/ \
+	-o $@ $< -lsigsafe
+
+valgrind_test1: valgrind_test1.cpp
+	$(CXX) $(CXXFLAGS) -g -O0 -o $@ $<
+
+data_race: data_race.c
+	$(CC) $(CFLAGS) -g -O0 -o $@ $< -lpthread
+
 %: %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
@@ -51,3 +73,5 @@ usage:
 	@echo "./fortify_bar 123456"
 	@echo "./fortify_baz %n"
 	@echo "./overf 012345678"
+	@echo "valgrind --leak-check=full --leak-resolution=high --show-reachable=yes ./valgrind_test1"
+	@echo "valgrind --tool=helgrind ./data_race"

@@ -1,0 +1,29 @@
+# vim: ft=python
+# $Id: SConscript 749 2004-05-09 04:08:17Z slamb $
+# Copyright (C) 2004 Scott Lamb <slamb@slamb.org>.
+# This file is part of sigsafe, which is released under the MIT license.
+
+Import('env')
+Import('arch')
+Import('os_name')
+
+platform_subdir = arch + '-' + os_name
+
+source = [
+    'sigsafe.c',
+    platform_subdir + '/sighandler_platform.c',
+    platform_subdir + '/emulated_syscalls.c',
+]
+
+if os_name == 'osf1':
+    # cc doesn't like assembling for us. Workaround.
+    source.append(env.Command(platform_subdir + '/sigsafe_syscalls.o',
+                platform_subdir + '/sigsafe_syscalls.S',
+                "$AS $_CPPDEFFLAGS -I#/src -I#/src/" + platform_subdir
+                + " -o $TARGET $SOURCES"))
+else:
+    source.append(platform_subdir + '/sigsafe_syscalls.S')
+
+env.Program(target = 'print_sizes', source = 'print_sizes.c')
+env.StaticLibrary(target = 'sigsafe', source = source)
+#env.SharedLibrary(target = 'sigsafe', source = source)

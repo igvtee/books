@@ -1,0 +1,17 @@
+# vim: ft=python
+# $Id: SConscript 752 2004-05-11 06:48:53Z slamb $
+# Copyright (C) 2004 Scott Lamb <slamb@slamb.org>.
+# This file is part of sigsafe, which is released under the MIT license.
+
+Import('env os_name extra_test_libs')
+env = env.Copy()
+env.Append(LIBS = extra_test_libs)
+
+for i in ['blocked_alarm',
+          'setitimer_rounding',
+          'socket_timeout',
+          'sigsuspend']:
+    env.Program(target = 'test_' + i, source = 'test_' + i + '.c')
+
+# Not compiling (at least for now) test_trap_throw - it requires some weird
+# compiler options.

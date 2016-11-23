@@ -1,0 +1,123 @@
+$Id: README 753 2004-05-11 08:12:25Z slamb $
+Scott Lamb <slamb@slamb.org>
+
+
+WHAT IS THIS?
+=============
+
+sigsafe is a C library for safely, reliably, and promptly handling signals
+delivered to specific threads without significant overhead. This is a common
+and challenging problem, and sigsafe can help. You'll find details in the
+HTML documentation, either here from api/index.html or at:
+
+    <http://www.slamb.org/projects/sigsafe/api/>
+
+sigsafe includes code, documentation, a performance benchmark, and a
+correctness tester that exhaustively searches for race conditions with the
+ptrace(2) facility.
+
+sigsafe is available for Linux/i386 and Darwin/ppc (OS X). More platforms
+should be ready soon.
+
+sigsafe is released under the MIT license.
+
+
+WHAT'S THE CATCH?
+=================
+
+Unfortunately, sigsafe requires writing assembly for each platform - platform
+being a combination of operating system and architecture. So far, it has been
+ported to:
+
+- Linux/x86
+- Darwin/ppc
+
+The other machines I have avaible to me are Linux/alpha, Tru64/alpha,
+HP-UX/PA-RISC, Solaris/sparc, FreeBSD/x86, FreeBSD/alpha, and Linux/ia64.
+I intend to eventually port it to most or all of them. Or, if you're
+impatient, you can tackle a port yourself. It's not as bad as it sounds. See
+the porting section below.
+
+
+WHAT'S INCLUDED?
+================
+
+- the sigsafe wrappers and control functions themselves
+
+- doxygen-generated API documentation
+
+- a performance benchmark
+  On the platforms I've tested so far, sigsafe performance is comparable to
+  raw system call performance. But don't take my word for it - run the test
+  yourself. It's easy!
+
+- a correctness test - it exhaustively searches for race conditions by
+  using process tracing to deliver the signal between each instruction
+  boundary.
+
+
+HOW DO I COMPILE IT?
+====================
+
+I used the scons build system avaible from <http://www.scons.org/>. It's
+Python-based, so you will also need to install Python if you don't have it
+already. (Or you could manually compile sigsafe; there aren't very many
+files.) I apologize for the additional dependency, but scons is completely
+superior to make+m4+sh+autoconf+automake. If I spent my time with an inferior
+build system, I couldn't spend it on more important things like improving the
+software itself.
+
+Assuming you've installed scons, type:
+
+    $ scons
+
+at the top level. It will produce everything in a build-XXX-YYY-ZZZ directory.
+Run the microbenchmark to see that performance is acceptable and the
+correctness tester to see that sigsafe works (and the other ways don't). Copy
+the library and include file to a suitable location, like /usr/local/bin.
+
+
+HOW DO I ADD A SYSTEM CALL?
+===========================
+
+In most cases, it's quite easy to add a new system call to an existing
+platform. You just need to:
+
+- add the prototype to sigsafe.h.
+- add it to the syscalls.h list for your platform.
+
+Some system calls are emulated - actually library functions implemented in
+terms of other, raw system calls. These are a bit more work. If it's not
+obvious how you could implement in terms of a raw system call, ask around or
+check your system's libc source code.
+
+
+WHAT MAY I DO WITH THIS SOFTWARE?
+=================================
+
+This code is all released under the MIT license. The full license text is
+below. The short version is that you may do anything with it you like
+(including selling it) except claiming it as your own. You also must not sue
+me if it doesn't meet your requirements.
+
+The full license text:
+
+Copyright (C) 2004 Scott Lamb
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

@@ -1,0 +1,6 @@
+$Id: README 732 2004-05-06 02:54:30Z slamb $
+
+This platform seems largely the same as alpha-linux. I confirmed this by using
+dbx and stepping into the read function.
+
+alpha/asm.h seems to also have some useful information.

@@ -1,0 +1,30 @@
+# vim: ft=python
+# $Id: SConscript 752 2004-05-11 06:48:53Z slamb $
+# Copyright (C) 2004 Scott Lamb <slamb@slamb.org>.
+# This file is part of sigsafe, which is released under the MIT license.
+
+Import('env os_name extra_test_libs')
+
+SConscript('platform_behavior/SConscript')
+if os_name != 'freebsd' and os_name != 'netbsd':
+    SConscript('race_checker/SConscript')
+
+env = env.Copy()
+env.Prepend(LIBS = ['sigsafe', 'm'])
+env.Append(LIBS = extra_test_libs)
+
+for i in ['simple_test',
+          'test_pipe_bytecount',
+          'test_sock_bytecount']:
+    env.Program(target = i, source = i + '.c')
+
+for i in [ #flags        #postfix
+          ([],           'raw'),
+          (['DO_SAFE'],  'safe'),
+          (['DO_SETJMP'],'setjmp'),
+          (['DO_SELECT'],'select')]:
+    myenv = env.Copy()
+    myenv.Append(CPPDEFINES = i[0])
+    obj = myenv.StaticObject(target = 'bench_read_' + i[1] + '.o',
+                             source = 'bench_read.c')
+    myenv.Program(target = 'bench_read_' + i[1], source = obj)

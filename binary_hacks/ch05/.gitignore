@@ -14,3 +14,13 @@ showsolibs01
 syscall-func01
 syscall-func02
 syscall-func03
+load_hello
+stackbase
+stackthread
+unwind01
+unwind02
+unwind03
+sigaltstack01
+sigaltstack02
+sigaltstack03
+signaleip

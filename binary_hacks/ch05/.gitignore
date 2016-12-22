@@ -24,3 +24,6 @@ sigaltstack01
 sigaltstack02
 sigaltstack03
 signaleip
+getpc
+modifyflow
+validateaddr

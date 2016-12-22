@@ -4,7 +4,8 @@ export LC_MESSAGES=C
 EXECS = syscall-func01 syscall-func02 syscall-func03 dlsay divbyzero backtrace01 \
 		backtrace02 readlink showsolibs01 malloc dumpsymbols01 dumpsymbols02 ffcall01 \
 		ffcall02 ffcall03 dump_sample load_hello unwind01 unwind02 unwind03 stackbase \
-		stackthread sigaltstack01 sigaltstack02 sigaltstack03 signaleip
+		stackthread sigaltstack01 sigaltstack02 sigaltstack03 signaleip getpc \
+		modifyflow validateaddr
 LIBS = gethostname.so bindwrap.so hello.so stack_usage.so audit.so
 
 all: $(EXECS) $(LIBS)
@@ -64,6 +65,12 @@ sigaltstack02: sigaltstack02.c
 	$(CC) $(CFLAGS) -o $@ $< -lpthread
 
 signaleip: signaleip.c
+	$(CC) $(CFLAGS) -m32 -o $@ $<
+
+getpc: getpc.c
+	$(CC) $(CFLAGS) -m32 -o $@ $<
+
+modifyflow: modifyflow.c
 	$(CC) $(CFLAGS) -m32 -o $@ $<
 
 .PHONY:clean usage

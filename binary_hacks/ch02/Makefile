@@ -53,6 +53,23 @@ fpic-no-pic.so: fpic.c
 fpic-pic.so: fpic.c
 	$(CC) $(CFLAGS) -m32 -shared -fPIC -o $@ $<
 
+main: a.o b.o main.o
+	$(CC) -o main a.o b.o main.o
+
+libsym.so: a.c b.c
+	$(CC) -fPIC -c a.c
+	$(CC) -fPIC -c b.c
+	$(CC) -shared -o $@ a.o b.o
+
+libsym.a: a.o b.o
+	$(AR) cr $@ $^
+
+main-static: main.o libsym.a
+	$(CC) -o $@ $^
+
+main-dynamic: a.so b.so main.so
+	$(CC) $(MYLDFLAGS) -o $@ $^
+
 .PHONY: clean
 clean:
 	rm -f $(OBJS) $(LIBS) $(EXECS) *.o *.a *.so

@@ -14,6 +14,18 @@ Relational Operators
 __eq equal to (==)
 __lt less than (<)
 __le less than or equal to (<=)
+
+Library-Defined
+__tostring printf
+__metatable limit user cannot change metatable
+
+Table-Access
+__index
+__newindex
+__mode
+__call
+__len
+__gc
 ]]--
 Set = {}
 Set.mt = {}			-- metatable for sets
@@ -102,3 +114,12 @@ print(s1 < s2)			--> true
 print(s1 >= s1)			--> true
 print(s1 > s1)			--> false
 print(s1 == s2 * s1)	--> true
+
+Set.mt.__tostring = Set.tostring
+s1 = Set.new{10, 4, 5}
+print(s1)			--> {4, 5, 10}
+
+Set.mt.__metatable = "not your business"
+s1 = Set.new{}
+print(getmetatable(s1))			--> not your bussiness
+setmetatable(s1, {})			--> cannot change a protected metatable

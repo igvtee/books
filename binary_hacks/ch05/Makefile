@@ -10,9 +10,6 @@ LIBS = gethostname.so bindwrap.so hello.so stack_usage.so audit.so
 
 all: $(EXECS) $(LIBS)
 
-%: %.c
-	$(CC) $(CFLAGS) -o $@ $<
-
 %.so: %.c
 	$(CC) $(CFLAGS) -shared -fPIC -o $@ $<
 

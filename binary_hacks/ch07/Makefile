@@ -7,9 +7,6 @@ TEMPS =
 
 all: $(EXECS) $(LIBS)
 
-%: %.c
-	$(CC) $(CFLAGS) -o $@ $<
-
 %.so: %.c
 	$(CC) $(CFLAGS) -shared -fPIC -o $@ $<
 

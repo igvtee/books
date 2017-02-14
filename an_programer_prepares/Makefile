@@ -10,12 +10,6 @@ EXECS=ImageSection SpecialSymbol ManualNameMangling WeakReference pthread \
 
 all: $(OBJS) $(LIBS) $(EXECS)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
-
-%: %.o
-	$(CC) $< -o $@
-
 %.so: %.c
 	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
 

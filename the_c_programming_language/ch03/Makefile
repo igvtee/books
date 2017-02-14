@@ -6,12 +6,6 @@ EXECS= $(patsubst %.c,%,$(wildcard exercise*.c)) \
 
 all: $(OBJS) $(LIBS) $(EXECS)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
-
-%: %.o
-	$(CC) $< -o $@
-
 .PHONY: clean
 clean:
 	rm -f $(OBJS) $(LIBS) $(EXECS) *.o *.so

@@ -9,12 +9,6 @@ OBJCOPY=objcopy
 
 all: $(OBJS) $(LIBS) $(EXECS) $(ASSM)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
-
-%: %.o
-	$(CC) $< -o $@
-
 %.so: %.c
 	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
 

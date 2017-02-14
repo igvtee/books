@@ -59,9 +59,6 @@ valgrind_test1: valgrind_test1.cpp
 data_race: data_race.c
 	$(CC) $(CFLAGS) -g -O0 -o $@ $< -lpthread
 
-%: %.c
-	$(CC) $(CFLAGS) -o $@ $<
-
 .PHONY:clean usage
 clean:
 	rm -f $(EXECS)

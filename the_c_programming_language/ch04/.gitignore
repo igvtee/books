@@ -1,0 +1,11 @@
+*.o
+exercise*
+!*.c
+atof
+calc
+calculator
+define
+grep
+printd
+qsort
+return

@@ -2,7 +2,7 @@
 
 #define TABINC	8	/* tab increment size */
 
-/* replace tabs with the proper number of blansk */
+/*detab: replace tabs with the proper number of blansk */
 main()
 {
 	int c, nb, pos;

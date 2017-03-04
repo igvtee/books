@@ -2,7 +2,7 @@
 
 #define TABINC	8	/* tab increment size */
 
-/* replace strings of blanks with tabs and blanks */
+/*entab: replace strings of blanks with tabs and blanks */
 main()
 {
 	int c, nb, nt, pos;

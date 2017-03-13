@@ -15,6 +15,8 @@ $(PROGS_LIBM): CFLAGS += -lm
 calc: main.o getop.o getch.o stack.o calc.h
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
+exercise4-07: exercise4-07.o ungets.o
+
 exercise4-11: main.o exercise4-11.o getch.o stack.o calc.h
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 

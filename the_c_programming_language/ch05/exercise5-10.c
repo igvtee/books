@@ -51,12 +51,3 @@ int main(int argc, char *argv[])
 	printf("\t%.8g\n", pop());
 	return 0;
 }
-
-/* ungets: push string back onto the inpu */
-void ungets(char s[])
-{
-	int len = strlen(s);
-
-	while (len > 0)
-		ungetch(s[--len]);
-}

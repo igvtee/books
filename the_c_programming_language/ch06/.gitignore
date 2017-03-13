@@ -1,0 +1,12 @@
+*.o
+exercise*
+!*.c
+point
+pointer
+keycount01
+keycount02
+holes
+wordcount
+typedef
+union
+bitfields

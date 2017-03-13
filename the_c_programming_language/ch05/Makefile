@@ -28,7 +28,7 @@ find01: find01.o getline.o
 
 find02: find02.o getline.o
 
-exercise5-10: exercise5-10.o ../ch04/getop.o ../ch04/getch.o ../ch04/stack.o
+exercise5-10: exercise5-10.o ../ch04/getop.o ../ch04/getch.o ../ch04/stack.o ../ch04/ungets.o
 
 exercise5-11-1: exercise5-11-1.o settab.o tabpos.o
 

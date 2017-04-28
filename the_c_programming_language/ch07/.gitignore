@@ -1,0 +1,10 @@
+*.o
+exercise*
+!*.c
+calculator
+cat
+cat2
+lower
+minprintf
+printf
+sscanf

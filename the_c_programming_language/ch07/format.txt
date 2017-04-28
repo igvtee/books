@@ -1,0 +1,54 @@
+printf format: %[-][width][.][precision][lh]CHARACTER
+-		left adjustment
+width		number; minimum field width
+.		separate the field width from the precision
+precision	number; maximum number of characters to print
+lh		h as a short, l as a long
+*		width or precision may be specified as *
+
+CHARACTER	ARGUMENT TYPE; PRINTED AS
+d, i	int; decimal number.
+o	int; unsigned octal number (without a leading zero).
+x, X	int; unsigned hexadecimal number (without a leading 0x or
+	0X), using abcdef or ABCDEF FOR 10,...,15.
+u	int; unsigned decimal number.
+c	int; single character.
+s	char *; print characters from the string until a '\0' or the
+	number of characters given by the precision.
+f	double; [-]m.dddddd, where the number of d's is given by the
+	precision (default 6).
+e, E	double; [-]m.dddddde[+/-]xx or [-]m.ddddddE[+/-]xx where the
+	number of d's is given by the precision (default 6).
+g, G	double; use %e or %E if the exponent is less than -4 or greater
+	than or equal to the precision; otherwise use %f. Trailing zeros
+	and a trailing decimal point are not printed.
+p	void *; pointer (implementation-dependent representation).
+%	no argument is converted; print a %.
+
+
+scanf format: %[*][width][lh]CHARACTER
+* Blanks or tabs, which are ignored.
+* Ordinary characters (not %), which are expected to match the next non-white
+  space character of the input stream.
+* Vonversion specifications, consisting of the character %, an optional
+  assignment suppression character *, an optional number specifying a maximum
+  field width, an optional h, l or L indicating the width of the target, and a
+  conversion character.
+
+CHARACTER	INPUT DATA; ARGUMENT TYPE
+d	decimal integer; int *
+i	integer; int *. The integer may be in octal (leading 0) or
+	hexadecimal (leading 0x or 0X).
+o	octal integer (with or without leading zero); int *.
+u	unsigned decimal integer; unsigned int *.
+x	hexadecimal integer (with or without leading 0x or 0X); int *.
+c	characters; char *. The next input characters (default 1) are
+	placed at the indicated spot. The normal skip over white space
+	is suppressed; to read the next non-white space character, use
+	%1s.
+s	character string (not quoted); char *. pointing to an array of
+	characters large enough for the string and a terminating '\0'
+	that will be added.
+e, f, g	floating-point number with optional sign, optional decimal point
+	and optional exponent; float *.
+%	literal %; no assigment is made.

@@ -1,0 +1,8 @@
+*.o
+exercise*
+!*.c
+copy
+cp
+getchar01
+getchar02
+memory

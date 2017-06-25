@@ -1,0 +1,135 @@
+a7.1 pointer generation
+	* expression "array of T" value is "pointer to the first object in the
+	array"
+	* expression "function returning T" value is "pointer to function
+	returning T"
+
+a7.2 primary expressions
+	primary-expression:
+		identifier
+		constant
+		string
+		( expression )
+
+a7.3 postfix expressions
+	postfix-expression:
+		primary-expression
+		postfix-expression [ expression ]
+		postfix-expression ( argument-expression-ilst_opt )
+		postfix-expression . identifier
+		postfix-expression -> identifier
+		postfix-expression ++
+		postfix-expression --
+
+	argument-expression-list:
+		assignment-expression
+		argument-expression-list , assignment-expression
+	a7.3.1 array references
+	a7.3.2 function calls
+	a7.3.3 structure references
+	a7.3.4 postfix incrementation
+
+a7.4 unary operators
+	unary-expression:
+		postifx-expression
+		++ unary-expression
+		-- unary-expression
+		unary-operator cast-expression
+		sizeof unary-expression
+		sizeof ( type-name )
+
+	unary-operator: one of
+		& * + - ~ !
+	a7.4.1 prefix incrementation operators
+	a7.4.2 address operator
+	a7.4.3 indirection operator
+	a7.4.4 unary plus operator
+	a7.4.5 unary minus operator
+	a7.4.6 one's complement operator
+	a7.4.7 logical negation operator
+	a7.4.8 sizeof operator
+
+a7.5 casts
+	cast-expression:
+		unary-expression
+		( type-name ) cast-expression
+
+a7.6 multiplicative operators
+	multiplicative-expression:
+		cast-expression
+		multiplicative-expression * cast-expression
+		multiplicative-expression / cast-expression
+		multiplicative-expression % cast-expression
+
+a7.7 additive operators
+	additive-expression:
+		multiplicative-expression
+		additive-expression + multiplicative-expression
+		additive-expression - multiplicative-expression
+
+a7.8 shift operators
+	shift-expression:
+		additive-expression
+		shift-expression << additive-expression
+		shift-expression >> additive-expression
+
+a7.9 relational operators
+	relational-expression:
+		shift-expression
+		relational-expression < shift-expression
+		relational-expression > shift-expression
+		relational-expression <= shift-expression
+		relational-expression >= shift-expression
+
+a7.10 equality operators
+	equality-expression:
+		relational-expression
+		equality-expression == relational-expression
+		equality-expression != relational-expression
+
+a7.11 bitwise and operator
+	and-expression:
+		equality-expression
+		and-expression & equality-expression
+
+a7.12 bitwise exclusive or operator
+	exclusive-or-expression:
+		and-expression
+		exclusive-or-expression ^ and-expression
+
+a7.13 bitwise inclusive or operator
+	inclusive-or-expression:
+		exclusive-or-expression
+		inclusive-or-expression ! exclusive-or-expression
+
+a7.14 logical and operator
+	logical-and-expression:
+		inclusive-or-expression
+		logical-and-expression && inclusive-or-expression
+
+a7.15 logical or operator
+	logical-or-expression:
+		logical-and-expression
+		logical-or-expression || logical-and-expression
+
+a7.16 conditional operator
+	conditional-expression:
+		logical-or-expression
+		logical-or-expression ? expression : conditional-expression
+
+a7.17 assignment expression
+	assignment-expression:
+		conditional-expression
+		unary-expression assignment-operator assignment-expression
+
+	assignment-operator: one of
+		= *= /= %= += -= <<= >>= &= ^= |=
+
+a7.18 comma operator
+	expression:
+		assignment-expression
+		expression , assignment-expression
+
+a7.19 constant expressions
+	constant-expression:
+		conditional-expression

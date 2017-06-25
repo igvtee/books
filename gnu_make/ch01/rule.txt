@@ -1,0 +1,11 @@
+target1 target2 target3 : prerequisite1 prerequisite2
+	command1
+	command2
+	command3
+
+# comment character
+
+target:
+	long \
+	command
+	# this comment will execute by shell

@@ -1,0 +1,7 @@
+# add include path
+make --include-dir (-I)
+
+# ignore include fail
+-include i-may-not-exist.mk
+sinclude i-may-not-exist.mk
+

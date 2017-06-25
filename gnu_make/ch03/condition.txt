@@ -1,0 +1,43 @@
+if-condition
+	text if the condition is true
+else
+	text if the condition is false
+endif
+
+if-condition is one of
+ifdef variable-name
+ifndef variable-name
+ifeq test
+ifneq test
+
+test is one of
+"a" "b"
+(a,b)
+
+# can't use tab before "ifdef/endif"
+libGui.a: $(gui_objects)
+	$(AR) $(ARFLAGS) $@ $<
+    ifdef RANLIB
+	$(RANLIB) $@
+    endif
+
+# space between two variable is ignore. others are not
+ifeq (a, a)
+	# these are equal
+endif
+
+ifeq ( b, b )
+	# these are not equal - ' b' != 'b '
+endif
+
+ifeq "a" "a"
+	# these are equal
+endif
+
+ifeq 'b' 'b'
+	# so are these
+endif
+
+ifeq "$(strip $(OPTIONS))" "-d"
+	COMPILATION_FLAGS += -DDEBUG
+endif

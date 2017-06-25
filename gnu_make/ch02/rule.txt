@@ -1,0 +1,133 @@
+vpath.o variable.o: make.h config.h getopt.h gettext.h dep.h
+# is equal
+vpath.o : make.h config.h getopt.h gettext.h dep.h
+variable.o: make.h config.h getopt.h gettext.h dep.h
+
+# no need all at once
+vpath.o : vpath.c make.h config.h getopt.h gettext.h dep.h
+vpath.o : filedef.h hash.h job.h commands.h variable.h vpath.h
+
+# complex example
+vpath.o: lexer.c
+vpath.o: vpath.c
+	$(COMPILE.c) $(RULE_FLAGS) $(OUTPUT_OPTION) $<
+include auto-generated-dependencies.d
+
+# variable
+$a
+$(word)
+
+# wildcard
+~, *, ?, [...], [^...]
+
+prog: *.c
+	$(CC) -o $@ $^
+
+# phony target
+.PHONY: clean
+clean:
+	rm -f *.o lexer.c
+
+.PHONY: all
+all: bash bashbug
+
+.PHONY: make-documentation
+make-documentation: df
+	javadoc ...
+.PHONY: df
+df:
+	df -k . | awk 'NR == 2 { printf( "%d available\n", $$4 ) }'
+
+$(Program): build_msg $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
+	$(RM) $@
+	$(CC) $(LDFLAGS) -o $(Program) $(OBJECTS) $(LIBS)
+	ls -l $(Program)
+	size $(Program)
+
+.PHONY: build_msg
+build_msg:
+	@printf "#\n# Building $(Program)\n#\n"
+
+# list implicit rules
+make --print-data-base
+
+# pattern
+%.v
+s%.o
+wrapper_%
+
+%: %.mod
+	$(COMPILE.mod) -o $@ -e $@ $^
+
+%: %.cpp
+	$(LINK.cpp) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+%: %.sh
+	cat $< > $@
+	chmod a+x $@
+
+# static pattern rule
+OBJECTS = foo.o bar.o
+$(OBJECTS): %.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# use with filter
+OBJECTS = foo.a bar.o
+$(filter %.o,$(OBJECTS)): %.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# suffix rule
+.c.o:
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+%.o: %.c
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+
+.p:
+	$(LINK.p) $^ $(LOADLIBES) $(LDLIBS) -o $@
+%: %.p
+	$(LINK.p) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+# known suffix list
+.SUFFIXES: .out .a .ln .o .c .cc .C .cpp .p .f .F .r .y .l
+# remove suffix
+.SUFFIXES:
+make --no-builtin-rules (or -r)
+
+# implicit rule
+# delete implicit rule by redefine it
+%.o: %.l
+%.c: %.l
+
+# customization
+%.o: %.c
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+
+COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+CC = gcc
+OUTPUT_OPTION = -o $@
+
+# target modifier
+.INTERMEDIATE		make will clean these files
+.SECONDARY		intermediate file but not clean
+.PRECIOUS		not delete files when interrupt
+.DELETE_ON_ERROR	delete files when interrupt
+
+# library
+xpong: $(OBJECTS) /lib/X11/libX11.a /lib/X11/libXaw.a
+	$(LINK) $^ -o $@
+xpong: $(OBJECTS) -lX11 -lXaw
+	$(LINK) $^ -o $@
+.LIBPATTERNS	define -l library name pattern
+
+# library circular reference (circularity)
+# cause duplicate library and need $+ not $^
+xpong: xpong.o libui.a libdynamics.a libui.a -lX11
+	$(CC) $+ -o $@
+
+# double-colon rule
+file-list:: generate-list-script
+	chmod +x $<
+	generate-list-script $(files) > file-list
+
+file-list:: $(files)
+	generate-list-script $(files) > file-list

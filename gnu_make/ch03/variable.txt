@@ -1,0 +1,46 @@
+# const
+CC := gcc
+MKDIR := mkdir -p
+
+# internal variable
+sources = *.c
+objects = $(subst .c,.o,$(sources))
+
+# function
+maybe-make-dir = $(if $(wildcard $1),,$(MKDIR) $1)
+assert-not-null = $(if $1,,$(error Illegal null value.))
+
+# simply expanded variable
+MAKE_DEPEND := $(CC) -M
+
+# recursively expanded variable
+MAKE_DEPEND = $(CC) -M
+
+# conditional variable assignment operator
+OUTPUT_DIR ?= $(PROJECT_DIR)/out
+
+# append operator
++=
+# ok append
+simple := $(simple) new stuff
+# error append
+recursive = $(recursive) new stuff
+
+# set variable
+make CFLAGS=-g CPPFLAGS='-DBSD -DDEBUG'
+
+# overwrite command line variables
+override LDFLAGS = -EB
+
+# pass variables to next make
+export CLASSPATH := $(HOME)/classes:$(PROJECT)/classes
+SHELLOPTS = -x
+export SHELLOPTS
+
+# export all
+export
+
+# clean variable
+unexport
+
+# shell use export, unset

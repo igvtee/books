@@ -1,0 +1,19 @@
+all
+install
+clean
+distclean
+TAGS
+info
+check
+
+empty target
+prog: size prog.o
+	$(CC) $(LDFLAGS) -o $@ ^?
+
+size: prog.o
+	size $^
+	touch size
+
+print: *.[hc]
+	lpr $?
+	touch $@

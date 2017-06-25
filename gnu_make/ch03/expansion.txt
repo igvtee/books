@@ -1,0 +1,10 @@
+Definition	Expansio of a	Expansion of b
+a = b		Immediate	Deferred
+a ?= b		Immediate	Deferred
+a := b		Immediate	Immediate
+a += b		Immediate	Deferred or Immediate
+define a	Immediate	Deferred
+b...
+b...
+b...
+endef

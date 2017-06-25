@@ -1,0 +1,16 @@
+automatic variable
+$@	target
+$%	archive member - foo.a(bar.o)
+$<	first prerequisite
+$?	newer prerequisites
+$^	all prerequisites without duplicate
+$+	all prerequisites with duplicate (for linker)
+$*	file name without suffix
+
+directory (function dir)
+$(@D)
+...
+
+file (function nodir)
+$(@F)
+...

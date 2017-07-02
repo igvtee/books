@@ -1,0 +1,13 @@
+root
+  |--makefile
+  |--include
+  |    |--db
+  |    |--codec
+  |    \-ui
+  |--lib
+  |    |--db
+  |    |--codec
+  |    \-ui
+  |--app
+  |    \player
+  \--doc

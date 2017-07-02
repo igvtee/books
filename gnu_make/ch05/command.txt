@@ -1,0 +1,7 @@
+@	silent
+-	ignore error
++	do command even if --just-print
+
+.DELETE_ON_ERROR
+.PRECIOUS
+

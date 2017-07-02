@@ -1,0 +1,3 @@
+QUIET = @
+hairy_script:
+	$(QUIET) complex script ...

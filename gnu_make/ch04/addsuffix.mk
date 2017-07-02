@@ -1,4 +1,4 @@
-# $(addsuffix suffix.name...)
+# $(addsuffix suffix,name...)
 # $(call find-program, filter-pattern)
 find-program = $(filter $1, \
 	$(wildcard \

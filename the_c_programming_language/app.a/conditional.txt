@@ -1,0 +1,30 @@
+preprocessor-conditional:
+  if-line text elif-parts else-part-opt #endif
+
+if-line:
+  # if constant-expression
+  # ifdef identifier
+  # ifndef identifier
+
+elif-parts:
+  elif-line text
+  elif-parts-opt
+
+elif-line:
+  # elif constant-expression
+
+else-part:
+  else-line text
+
+else-line:
+  # else
+
+
+defined identifier
+defined ( identifier )
+
+#ifdef identifier
+#ifndef identifier
+
+# if defined identifier
+# if ! defined identifier

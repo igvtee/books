@@ -1,0 +1,31 @@
+# assert.h
+void assert(int expression)
+
+#stdarg.h
+va_start(va_list ap, lastarg)
+type va_arg(va_list ap, type)
+void va_end(va_list ap)
+
+# setjmp.h
+int setjmp(jmp_buf env)
+void longjmp(jmp_buf env, int val)
+
+# signal.h
+void (*signal(int sig, void (*handler)(int)))(int)
+int raise(int sig)
+
+# time.h
+clock_t clock(void)
+time_t time(time_t *tp)
+	current calendar time
+double difftime(time_t time2, time_t time1)
+	time2-time1 expressed in seconds
+time_t mktime(struct tm *tp)
+	converts the local time into calendar time
+char *asctime(const struct tm *tmp)
+char *ctime(const time_t *tp)
+struct tm *gmtime(const time_t *tp)
+	converts the calendar time to UTC
+struct tm *localtime(const time_t *tp)
+	convert the calendar time into local time
+size_t strftime(char *s, size_t smax, const char *fmt, const struct tm *tp)

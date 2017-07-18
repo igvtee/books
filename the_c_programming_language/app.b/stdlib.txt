@@ -1,0 +1,39 @@
+double atof(const char *s)
+int atoi(const char *s)
+long atol(const char *s)
+double strtod(const char *s, char **endp)
+	strtod converts the prefix of s to double, ignoring leading white
+	space; it stores a pointer to any unconverted suffix in *endp unless
+	endp is NULL. If the answer would overflow, HUGE_VAL is returned with
+	the proper sign; if the answer would underflow, zero is returned. in
+	either case errno is set to ERANGE.
+long strtol(const char *s, char **endp, int base)
+	strtol converts the prefox of s to long, ignoring leading white space;
+	it stores a pointer to any unconverted suffix in *endp unless endp is
+	NULL. if base is between 2 and 36, conversion is done assuming that
+	the input is written in that base. if base is zero, the base is 8, 10,
+	or 16; leading 0 implies octal and leading 0x or 0X hexadecimal.
+	letters in either case represent digits from 10 to base-1; a leading
+	0x or 0X is permitted in base 16. if the answer would overflow,
+	LONG_MAX or LONG_MIN is returned, depending on the sign of the result,
+	and errno is set to ERANGE.
+unsigned long strtoul(const char *s, char **endp, int base)
+int rand(void)
+void srand(unsigned int seed)
+void *calloc(size_t nobj, size_t size)
+void *malloc(size_t size)
+void *realloc(void *p, size_t size)
+void free(void *p)
+void abort(void)
+void exit(int status)
+int atexit(void (*fcn)(void))
+int system(const char *s)
+char *getenv(const char *name)
+void *bsearch(const void *key, const void *base, size_t n, size_t size,
+	int (*cmp)(const void *keyval, const void *datum))
+void qsort(void *base, size_t n, size_t size,
+	int (*cmp)(const void *keyval, const void *datum))
+int abs(int n)
+long labs(long n)
+div_t div(int num, int denom)
+idiv_t ldiv(long num, long denom)

@@ -1,0 +1,29 @@
+sin(x)		sine of x
+cos(x)		cosine of x
+tan(x)		tangent of x
+asin(x)		sin-1(x)
+acos(x)		cos-1(x)
+atan(x)		tan-1(x)
+atan2(y,x)	tan-1(y/x)
+sinh(x)		hyperbolic sine of x
+cosh(x)		hyperbolic cosine of x
+tanh(x)		hyperbolic tangent of x
+exp(x)		exponential function e^x
+log(x)		natural logarithm ln(x), x>0
+log10(x)	base 10 logarithm log10(x), x>0
+pow(x,y)	x^y
+sqrt(x)
+ceil(x)		smallest integral not less than x
+floor(x)	largest integer not greater than x
+fabs(x)		absolute value |x|
+ldexp(x,n)	x*2^n
+frexp(x, int *exp)
+		splits x into a normalized fraction in the interval [1/2, 1),
+		which is returned, and a power of 2, which is stored in *exp.
+		if x is zero, both parts of the result are zero.
+modf(x, double *ip)
+		splits x into integral and fractional parts, each with the
+		same sign as x. it stores the integral part int *ip, and
+		returns the fractional part.
+fmod(x,y)	floating-point remainder of x/y, with the same sign as x. if y
+		is zero, the result is implementation-defined.

@@ -1,0 +1,35 @@
+char *strcpy(s,ct)	copy string ct to strings, including '\0'; return s.
+char *strncpy(s,ct,n)	copy at most n characters of string ct to s; return s.
+			Pad with '\0's if t has fewer than n characters.
+char *strcat(s,ct)	concatenate string ct to end of string s; return s
+char *strncat(s,ct,n)	concatenate at most n characters of string ct to
+			string s, terminate s with '\0'; return s.
+int strcmp(cs,ct)	compare string cs to string ct;
+int strncmp(cs,ct,n)	compare at most n characters of string cs to string ct;
+char *strchr(cs,c)	return pointer to first occurrence of c in cs or NULL
+			if not present.
+char *strrchr(cs,c)	return pointer to last occurrence of c in cs or NULL
+			if not present.
+size_t strspn(cs,ct)	return length of prefix of cs consisting of characters
+			in ct
+size_t strcspn(cs,ct)	return length of prefix of cs consisting of characters
+			not in ct.
+char *strpbrk(cs,ct)	return pointer to first occurrence in string cs of any
+			character of string ct, or NULL if none are present.
+char *strstr(cs,ct)	return pointer to first occurrence of string ct in cs,
+			or NULL if not present.
+size_t strlen(cs)	return length of cs.
+char *strerror(n)	return pointer to implementation-defined string
+			corresponding to error n.
+char *strtok(s,ct)	strtok searches s for tokens delimited by characters
+			from ct.
+
+void *memcpy(s,ct,n)	copy n characters from ct to s. and return s.
+void *memmove(s,ct,n)	same as memcpy except that it works even if the
+			objects overlap.
+int memcmp(cs,ct,n)	compare the first n characters of cs with ct; return
+			as with strcmp.
+void *memchr(cs,c,n)	return pointer to first occurrence of character c in
+			cs, or NULL if not present among the first n characters.
+void *memset(s,c,n)	place character c into first n characters of s, return
+			s.

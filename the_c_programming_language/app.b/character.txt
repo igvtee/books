@@ -1,0 +1,18 @@
+printing character: 0x20(' ') to 0x7E('~')
+control character: 0(NUL) to 0x1F(US) and 0x7F(DEL)
+
+int isalnum(int c)	isalpha(c) or isdigit(c)
+int isalpha(int c)	isupper(c) or islower(c)
+int iscntrl(int c)	control character
+int isdigit(int c)	decimal digit
+int isgraph(int c)	printing character except space
+int islower(int c)	lower-case
+int isprint(int c)	printing character include space
+int ispunct(int c)	printing character except space or letter or digit
+int isspace(int c)	space, formfeed, newline, carriage return, tab,
+vertical tab
+int isupper(int c)	upper-case
+int isxdigit(int c)	hexadecimal digit
+
+int tolower(int c)	convert c to lower case
+int toupper(int c)	convert c to upper case

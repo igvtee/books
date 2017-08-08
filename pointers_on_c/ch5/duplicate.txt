@@ -1,0 +1,12 @@
+a = f1(x);
+b = f2(x + a);
+for ( c = f3(a, b); c > 0; c = f3(a, b)) {
+	statements;
+	a = f1(++x);
+	b = f2(x + a);
+}
+
+while (a = f1(x), b = f2(x + a), c = f3(a, b), c > 0) {
+	statements;
+	x++;
+}

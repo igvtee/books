@@ -1,0 +1,16 @@
+a = get_value();
+count_value(a);
+while ( a > 0 ) {
+	...
+	a = get_value();
+	count_value(a);
+}
+
+
+while ( a = get_value(), count_value(a), a > 0 ) {
+	...
+}
+
+while ( count_value( a = get_value() ), a > 0 ) {
+	...
+}

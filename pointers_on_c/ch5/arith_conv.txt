@@ -1,0 +1,7 @@
+long double
+double
+float
+unsigned long int
+long int
+unsigned int
+int

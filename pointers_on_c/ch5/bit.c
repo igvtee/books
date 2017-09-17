@@ -5,7 +5,7 @@ void set_bit(char bit_array[], unsigned bit_number)
 	int idx = bit_number >> 3;
 
 	bit_number &= 0x7;
-	bit_array[idx] |= 1 << (8 - bit_number);
+	bit_array[idx] |= 1 << (7 - bit_number);
 }
 
 void clear_bit(char bit_array[], unsigned bit_number)
@@ -13,7 +13,7 @@ void clear_bit(char bit_array[], unsigned bit_number)
 	int idx = bit_number >> 3;
 
 	bit_number &= 0x7;
-	bit_array[idx] &= ~(1 << (8 - bit_number));
+	bit_array[idx] &= ~(1 << (7 - bit_number));
 }
 
 void assign_bit(char bit_array[], unsigned bit_number, int value)
@@ -27,9 +27,10 @@ int test_bit(char bit_array[], unsigned bit_number)
 	int idx = bit_number >> 3;
 
 	bit_number &= 0x7;
-	return (bit_array[idx] >> (8 - bit_number)) & 1;
+	return (bit_array[idx] >> (7 - bit_number)) & 1;
 }
 
+#ifndef __BITS_LIB__
 int main(void)
 {
 	char array[4] = {0};
@@ -49,3 +50,4 @@ int main(void)
 
 	return 0;
 }
+#endif

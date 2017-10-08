@@ -1,0 +1,12 @@
+int array[10];
+int *ap = array + 2;
+
+ap 	= array+2	= &array[2]
+*ap	= *(array+2)	= array[2]
+ap[0]	= *(ap + 0)	= *ap
+ap+6	= array+8	= &array[8]
+*(ap+6)	= *(array+8)	= array[8]
+ap[6]	= *(ap+6)
+&ap	= ?
+ap[-1]	= *(ap-1)	= *(array+1)	= array[1]
+ap[9]	= *(array+11)	// out of range 10

@@ -16,7 +16,7 @@ lookup_keyword( char const * const desired_word,
 	/*
 	** For each word in the table ...
 	*/
-	for( kwp = keyword_table; kwp < keyword_table + size; kwp++ )
+	for( kwp = keyword_table; *kwp != NULL; kwp++ )
 		/*
 		** If this word matches the one we're looking for,
 		** return its position in the table.
@@ -37,7 +37,8 @@ char const *keyword[] = {
 	"register",
 	"return",
 	"switch",
-	"while"
+	"while",
+	NULL
 };
 #define N_KEYWORD (sizeof(keyword) / sizeof(keyword[0]))
 

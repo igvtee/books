@@ -1,0 +1,7 @@
+*.o
+count
+dll_ins6
+dll_remove
+indextable
+sll_remove
+sll_reverse

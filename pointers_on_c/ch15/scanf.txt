@@ -1,0 +1,4 @@
+		h		l		L
+d,i,n		short		long
+o,u,x		unsigned short	unsigned long
+e,f,g				double		long double

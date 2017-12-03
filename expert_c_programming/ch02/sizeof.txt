@@ -1,0 +1,2 @@
+p = N * sizeof * q;
+r = malloc(p);

@@ -1,0 +1,4 @@
+void (*signal(int sig, void (*func)(int)))(int);
+
+typedef void (*ptr_to_func)(int);
+ptr_to_func signal(int, ptr_to_func);

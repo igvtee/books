@@ -1,0 +1,10 @@
+/* process ID info */
+
+struct pid_tag {
+	unsigned int incative	: 1;
+	unsigned int		: 1; /* 1 bit of padding */
+	unsigned int refcount	: 6;
+	unsigned int		: 0; /* pad to next word boundary */
+	short pid_id;
+	struct pid_tag *link;
+};

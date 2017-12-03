@@ -1,0 +1,3 @@
+function apple () { /* visible everywhere */}
+exter function pear () { /* visible everywhere */}
+static function turnip () { /* not visible outsize this file */}

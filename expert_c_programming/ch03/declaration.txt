@@ -1,0 +1,9 @@
+You can't have any of these:
+* a function can't return a function, so you'll never see foo()()
+* a function can't return an array , so you'll never see foo()[]
+* an array can't hold a function, so you'll never see foo[]()
+
+You can have any of these:
+* a function returning a pointer to a function is allowed: int (* fun())()
+* a function returning a pointer to an array is allowed: int (* fun())[]
+* an array holding pointers to functions is allowed: int (* foo[])()

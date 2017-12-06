@@ -1,0 +1,7 @@
+libfruit.a
+libfruit.so
+libfruit_s.a
+main
+main.linker.map
+test
+tomato.o

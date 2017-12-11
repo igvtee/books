@@ -1,0 +1,18 @@
+-rwxr-xr-x 1 michael michael 7768 Dec 10 21:28 hello
+   text	   data	    bss	    dec	    hex	filename
+   1119	    552	      8	   1679	    68f	hello
+-rwxr-xr-x 1 michael michael 7792 Dec 10 21:30 hello2
+   text	   data	    bss	    dec	    hex	filename
+   1119	    552	   4032	   5703	   1647	hello2
+-rwxr-xr-x 1 michael michael 11808 Dec 10 21:31 hello3
+   text	   data	    bss	    dec	    hex	filename
+   1119	   4568	      8	   5695	   163f	hello3
+-rwxr-xr-x 1 michael michael 11888 Dec 10 21:34 hello4
+   text	   data	    bss	    dec	    hex	filename
+   1276	   4576	      8	   5860	   16e4	hello4
+-rwxr-xr-x 1 michael michael 11888 Dec 10 21:34 hello5
+   text	   data	    bss	    dec	    hex	filename
+   1308	   4576	      8	   5892	   1704	hello5
+-rwxr-xr-x 1 michael michael 13056 Dec 10 21:40 hello6
+   text	   data	    bss	    dec	    hex	filename
+   1308	   4576	      8	   5892	   1704	hello6

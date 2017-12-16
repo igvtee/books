@@ -1,0 +1,8 @@
+char			int
+bit-field		int
+enum			int
+unsigned char		int
+short			int
+unsigned short		int
+float			double
+array of anything	pointer to anything

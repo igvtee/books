@@ -1,0 +1,11 @@
+*.o	
+asynio
+cdecl
+char_size
+curses
+file
+have_fun
+kbhit
+mixtype
+printf
+stty

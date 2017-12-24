@@ -1,0 +1,16 @@
+/* is the same */
+char a[6] = "12345";
+char 6[a] = "12345";
+
+/* is the same */
+my_function(int *turnip) { ... }
+my_function(int turnip[]) { ... }
+my_function(int turnip[200]) { ... }
+
+/* is the same */
+char carrot[10][20]
+
+typedef char vegetable[20];
+vegetable carrot[10];
+
+*(*(carrot + i) + j)

@@ -1,0 +1,9 @@
+Rule 1.
+	An array name is an expression (in contrast with a declaration) is
+	treated by the compiler as a pointer to the first element of the
+	array.
+Rule 2.
+	A subscript is always equivalent to an offset from a pointer.
+Rule 3.
+	An array name is the declaration of a function parameter is treated by
+	the compiler as a pointer to the first element of the array.

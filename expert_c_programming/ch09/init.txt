@@ -1,0 +1,32 @@
+char vegetables[][9] = {
+	"beet",
+	"barley",
+	"basil",
+	"broccoli",
+	"beans"
+};
+
+char *vegetables[] = {
+	"beet",
+	"barley",
+	"basil",
+	"broccoli",
+	"beans"
+};
+
+/* will not compile successfully */
+int *weight[] = {
+	{1, 2, 3, 4, 5},
+	{6, 7},
+	{8, 9, 10}
+};
+
+/* -1 is ned-of-row marker */
+int row_1[] = {1, 2, 3, 4, 5, -1};
+int row_2[] = {6, 7, -1};
+int row_3[] = {8, 9, 10, -1};
+int *weight[] = {
+	row_1,
+	row_2,
+	row_3
+};

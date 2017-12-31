@@ -1,0 +1,14 @@
+=== object-oriented paradigm ===
+
+abstraction
+class
+object
+encapsulation
+inheritance
+
+=== availability ===
+public
+protected
+private
+friend
+virtual

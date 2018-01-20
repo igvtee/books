@@ -1,0 +1,4 @@
+(x) ((x)-1)
+
+typedef int x;
+typedef void (*T)(void *);

@@ -1,0 +1,5 @@
+"a---b" is "a -- - b"
+
+y = x/*p	/* p points at the divisor */
+y = x / *p
+y = x/(*p)

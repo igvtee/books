@@ -1,0 +1,13 @@
+(*(void (*)())0)();
+
+float *g(), (*h)();
+float (*h)(); ==> (float (*)())
+
+void (*fp)(); ==> (void (*)()) ==> (*(void (*)())fp)();
+
+typedef void (*funcptr)()
+(*(funcptr)0)();
+
+typedef void (*HANDLER)(int);
+HANDLER signal(int, HANDLER);
+

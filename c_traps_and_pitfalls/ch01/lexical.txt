@@ -1,0 +1,3 @@
+token 符號
+lexical analyzer 詞法分析器
+greedy lexical analysis

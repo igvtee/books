@@ -1,0 +1,31 @@
+int a[3];
+*(a+i) == a[i] == i[a]
+
+int calendar[12][31];
+int *p;
+int i;
+p = calendar[4];
+i = calendar[4][7];
+i = *(calendar[4] + 7);
+i = *(*(calendar + 4) + 7);
+
+int (*monthp)[31];
+monthp = calendar;
+
+int month;
+for (month=0; month<12; month++) {
+	int day;
+	for (day = 0; day < 31; day++)
+		calendar[month][day] = 0;
+}
+
+int (*monthp)[31];
+for (monthp = calendar; monthp < &calendar[12]; monthp++) {
+	int *dayp;
+	for (dayp = *monthp; dayp<&(*monthp)[31]; dayp++)
+		*dayp = 0;
+}
+
+extern char *hello;
+is not equal
+extern char hello[];

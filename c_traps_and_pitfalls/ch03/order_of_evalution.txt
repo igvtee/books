@@ -1,0 +1,8 @@
+/* error */
+i = 0;
+while (i < n)
+	y[i] = x[i++];
+
+/* ok */
+for (i = 0; i < n; i++)
+	y[i] = x[i]

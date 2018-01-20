@@ -1,0 +1,16 @@
+a.b.c	=> (a.b).c
+*p()	=> *(p())
+*p++	=> *(p++)   fetch the object pointed by p and later increment p
+	=/=> (*p)++ increment the object pointed to by p
+1/2*a	=> (1/2)*a
+a < b == c < d	=> (a < b) == (c < d)
+tax_rate = income>40000 && residency<5 ? 3.5 : 2.0;
+home_score = visitor_score = 0;
+
+while (c=getc(in) != EOF)
+	putc(c, out);
+
+if ((t=BTYPE(pt1->aty)==STRTY) || t==UNIONTY)
+
+* Every logic operator has lower precedence then every relational operator
+* The shift operators bind more tightly than the relational operators but less tightly than the arithmetic operators

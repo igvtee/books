@@ -1,0 +1,5 @@
+*.o
+pragma_once
+static_init
+variable_array
+zero_struct

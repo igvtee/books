@@ -1,0 +1,71 @@
+Optimizations
+  * -O2, -O3, -Os
+Warnings
+  * -Wall -Wextra -Wpedantic
+  * -Werror -Wshadow
+  * -Wstrict-overflow -fno-strict-aliasing
+  * -Wno-missing-field-initializers
+Building
+  * LTO — Link Time Optimization
+  * make -j
+  * -flto
+Arch
+  * -march=native
+  * -msse2 -msse4.2
+
+Types
+  * #include <stdint.h>
+  * int8_t, int16_t, int32_t, int64_t — signed integers
+  * uint8_t, uint16_t, uint32_t, uint64_t — unsigned integers
+  * float — standard 32-bit floating point
+  * double - standard 64-bit floating point
+Special Standard Types
+  * int_fast8_t, int_fast16_t, int_fast32_t, int_fast64_t — signed integers
+  * uint_fast8_t, uint_fast16_t, uint_fast32_t, uint_fast64_t — unsigned integers
+  * int_least8_t, int_least16_t, int_least32_t, int_least64_t — signed integers
+  * uint_least8_t, uint_least16_t, uint_least32_t, uint_least64_t — unsigned integers
+Pointers as Integers
+  * uintptr_t defined by <stdint.h>
+  * ptrdiff_t is defined by <stddef.h>
+  * ptrdiff_t diff = (uintptr_t)ptrOld - (uintptr_t)ptrNew;
+  * printf("%p is unaligned by %" PRIuPTR " bytes.\n", (void *)p, ((uintptr_t)somePtr & (sizeof(void *) - 1)));
+System-Dependent Types
+  * On modern 32-bit platforms, intptr_t is int32_t.
+  * On modern 64-bit platforms, intptr_t is int64_t.
+Maximum Value Holders
+  * intmax_t uintmax_t
+That Other Type
+  * size_t ssize_t
+  * on a 32-bit platform size_t is uint32_t
+  * on a 64-bit platform size_t is uint64_t
+Printing Types
+  * You should never cast types during printing. <inttypes.h>
+  * size_t - %zu
+  * ssize_t - %zd
+  * ptrdiff_t - %td
+  * raw pointer value - %p (prints hex in modern compilers; cast your pointer to (void *) first)
+  * int64_t - "%" PRId64
+  * uint64_t - "%" PRIu64
+  * 64-bit types should only be printed using PRI[udixXo]64 style macros.
+  * intptr_t — "%" PRIdPTR
+  * uintptr_t — "%" PRIuPTR
+  * intmax_t — "%" PRIdMAX
+  * uintmax_t — "%" PRIuMAX
+  * printf("Local number: %" PRIdPTR "\n\n", someIntPtr);
+C99 allows variable declarations anywhere
+C99 allows for loops to declare counters inline
+C allows static initialization of auto-allocated structs
+  * If your struct has padding, the {0} method does not zero out extra padding bytes.
+C99 added variable length arrays (C11 made them optional)
+  * variable length arrays are (usually) stack allocated just like regular arrays.
+C99 allows annotating non-overlapping pointer parameters
+  * restrict keyword
+Parameter Types
+  * If a function accepts arbitrary input data and a length to process, don't restrict the type of the parameter.
+Return Parameter Types
+  * C99 gives us the power of <stdbool.h> which defines true to 1 and false to 0.
+Formatting
+  * clang-format
+misc thoughts
+  * Never use malloc. You should always use calloc.
+  * Never memset (if you can avoid it)

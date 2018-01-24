@@ -1,0 +1,38 @@
+Avoid assigning 64-bit long integers to 32-bit integers.
+Avoid assigning 64-bit pointers to 32-bit integers.
+Fix alignment issues caused by changes in data type sizes.
+Avoid pointer and long integer truncation during arithmetic operations.
+
+General Programming Tips
+  * Avoid casting pointers to non pointers.
+  * Fix format strings.
+
+Data Type and Alignment Tips
+  * Be careful when mixing integers and long integers.
+  * Be sure to control alignment of shared data.
+  * Use sizeof with malloc.
+  * 64-bit sizeof returns size_t.
+  * Use explicit (fixed-width) C99 types.
+  * Watch for conversion errors.
+  * Use 64-bit types for pointer arithmetic results.
+  * Avoid truncating file positions and offsets.
+  * Be careful with variable argument lists.
+
+Avoiding Pointer-to-Integer Conversion
+
+Working with Bits and Bitmasks
+  * Shift carefully. (LONG_BIT)
+  * Use inverted masks if needed.
+
+Alignment Pragmas
+
+Sign Extension Rules for C and C-derived Languages
+  1. The sum of a signed value and an unsigned value of the same size is an unsigned value.
+  2. Any promotion always results in a signed type unless a signed type cannot hold all values of the original type (that is, unless the resulting type is the same size as the original type).
+  3. Unsigned values are zero extended (not sign extended) when promoted to a larger type.
+  4. Signed values are always sign extended when promoted to a larger type, even if the resulting type is unsigned.
+  5. Constants (unless modified by a suffix, such as 0x8L) are treated as the smallest size that will hold the value. Numbers written in hexadecimal may be treated by the compiler as signed and unsigned int, long, and long long types. Decimal numbers will always be treated as signed types.
+
+Porting Assembly Language Code
+  * Register Changes
+  * Instruction Changes

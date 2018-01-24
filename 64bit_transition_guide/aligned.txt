@@ -1,0 +1,3 @@
+TYPE *aligned = (TYPE *) ((int) misalignedPtr & 0xFFFFFFF0); // BAD!
+
+TYPE *aligned = (TYPE *) ((intptr_t) misalignedPtr & ~(intptr_t)0xF);

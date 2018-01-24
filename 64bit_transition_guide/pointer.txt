@@ -1,0 +1,7 @@
+int *myptr = getPointerFromSomewhere();
+int *shiftbytwobytes = (int *)(((int)myptr) + 2);
+
+can be rewritten as:
+
+int *myptr = getPointerFromSomewhere();
+int *shiftbytwobytes = (int *)(((char *)myptr) + 2);

@@ -1,0 +1,6 @@
+function_name(long value)
+{
+    long mask = ~0x3; // 0xfffffffc or 0xfffffffffffffffc
+
+    return (value & mask);
+}

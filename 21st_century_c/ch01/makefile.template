@@ -1,0 +1,8 @@
+P=program_name
+OBJECTS=
+CFLAGS = -g -Wall -O3
+LDFLAGS=
+LDLIBS=
+CC=c99
+
+$(P): $(OBJECTS)

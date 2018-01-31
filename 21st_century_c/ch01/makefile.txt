@@ -1,0 +1,23 @@
+export CFLAGS='-g -Wall -O3'
+shell's startup script .bashrc or .zshrc
+PANTS=kakhi env | grep PANTS
+PANTS=kakhi PLANTS="ficus fern" env | grep 'P.*NTS'
+
+/* set a makefile variable. */
+make CFLAGS="-g -Wall"
+/* set an environment variable that only make and its children see */
+CFLAGS="-g -Wall" make
+
+make built-in variables
+$@ : target filename
+$* : target file with the suffix cut off
+$< : file that caused this target to get triggeded and made
+
+/* default rules */
+make -p > default_rules
+
+/* pkg-config */
+CFLAGS=`pkg-config --cflags apophenia glib-2.0` -g -Wall -std=gnu11 -O3
+LDLIBS=`pkg-config --libs apophenia glib-2.0`
+
+CFLAGS=-I/usr/local/include LDFLAGS=-L/usr/local/lib -Wl,-R/usr/local/lib

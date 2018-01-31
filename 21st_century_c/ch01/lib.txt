@@ -1,0 +1,7 @@
+/* library order matters. any other ordering probably fail.
+ * linker looking at the first item and writing down a list of
+ * unresolved names. Then goes to the next item.
+ */
+gcc specific.o -lbroad -lgeneral
+
+export LD_LIBRARY_PATH=LIBPATH:$LD_LIBRARY_PATH

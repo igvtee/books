@@ -1,0 +1,3 @@
+CFLAGS += -pg
+only the executable is profiled, not libraries that are linked to it.
+gprof your_program > profile

@@ -1,0 +1,16 @@
+/** like so */ will parse the comment.
+/* like so */ are ignored.
+/** \file */ at head of file. doxygen will parse the file.
+\param segments describing the input parametsers
+\return line listing the expected return value
+\ref cross-reference to other documented elements
+@ anywhere
+\mainpage
+\page
+
+/* generate configuration file */
+doxygen -g
+/* generate document */
+doxygen
+
+documentation.h

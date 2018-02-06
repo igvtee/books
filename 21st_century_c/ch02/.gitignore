@@ -1,0 +1,8 @@
+*.o
+*.gcda
+*.gcno
+*.gcov
+dict_test
+glist
+stddev
+stddev_bugged

@@ -1,0 +1,23 @@
+CWEB files with a .w extension
+Run cweave groups.w to produce a .tex file
+Run pdftex groups.tex to produce a PDF
+Run ctangle groups.w to produce a .c file
+make groups will run ctangle for you
+
+* Every special code for CWEB has an @ followed by a single character.
+  Be careful to write @<titles@> and not @<incorrect titles>@.
+* Every segment has a comment, the code. It's OK to have a blank
+  comment, but that comment-code rhythm has to be there, or else
+  all sorts of errors turn up.
+* Start a text section with an @ following by a space. Then expound,
+  using TeX formatting.
+* Start an unnamed chunk of code with @c.
+* Start a named block of code with a title followed by an equals sign
+  (because this is a definition): @<an operation@>=.
+* That block will get inserted verbatim wherever you use the title.
+  That is, each chunk name is effectively a macro that expands to the
+  chunk of code you specified, but without all the extra rules of C
+  preprocessor macros.
+* Sections (like the sections in the example about group membership,
+  setting up, plotting with Gnuplot, and so on) start with @* and 
+  have a title ending in a period.

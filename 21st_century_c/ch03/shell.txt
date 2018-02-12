@@ -1,0 +1,7 @@
+run a shell script via
+* . script.sh
+* source script.sh
+
+backtick is largely equivalent to $()
+echo `date`
+echo $(date)

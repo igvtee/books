@@ -1,0 +1,8 @@
+* don't bother explicitly returning from main
+* we would need "int main(void)" to be clear that main is taking no arguments.
+  But since 1999, "An empty list in a function declarator that is part of a
+  definition of that function specifies that the function has no parameters"
+  [C99 $6.7.5.3(14) and C11 $6.7.6.3(14)].
+* set array size at runtime
+* NaN is that testing for equality always fails - after setting x=NAN, even
+  x==x will evaluate to false. Use isnan(x) to test whether x is NaN.

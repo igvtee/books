@@ -1,0 +1,6 @@
+* put all inputs in parens. if you have an expression-type macro, put the
+  macro expansion itself in parens.
+* avoid double usage.
+* curly braces for blocks.
+* wrap the curly braces macro still further in a run-once do-while loop.
+* gcc -E curly.c

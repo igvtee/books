@@ -1,0 +1,15 @@
+The trick to reading declarations is to read from right to left.
+you can switch a type name and const
+
+int const
+	a constant integer
+int const *
+	a (variable) pointer to a constant integer
+int * const
+	a constant pointer to a (variable) integer
+int * const *
+	a pointer to a constant pointer to an integer
+int const * *
+	a pointer to a pointer to a constant integer
+int const * const *
+	a pointer to a constant pointer to a constant integer

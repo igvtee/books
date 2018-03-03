@@ -1,0 +1,3 @@
+C11 printing functions with _s. ex printf_s, snprintf_s, fprintf_s, and so on.
+when write more than RINT_MAX to a string. the function fails with a "runtime
+constraint violation".

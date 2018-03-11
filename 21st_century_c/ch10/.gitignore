@@ -1,0 +1,17 @@
+*.o
+amort_use
+array_init
+boxes
+double_printf
+double_printf1
+errortuple
+ideal
+init_zero
+olden_varargs
+papersize
+safe_sum
+show_tree
+sum_to_nan
+times_table
+varad
+charct\nforeach\nmacro_varargs\nvectorize\n

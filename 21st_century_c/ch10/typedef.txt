@@ -1,0 +1,6 @@
+typedef struct newstruct_s {
+	int a, b;
+	double c, d;
+} newstructs_s;
+Can use the same name. struct tags have a separate namespace from
+other identifiers [K&R and ed. $A8.3 (p. 213); C99 and C11 $6.2.3(1)]

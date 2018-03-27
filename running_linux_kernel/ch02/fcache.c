@@ -1,3 +1,6 @@
+#include <linux/module.h>
+#include <linux/slab.h>
+
 static struct kmem_cache *fcache;
 static void *buf;
 
@@ -21,3 +24,4 @@ static void __exit fcache_exit(void)
 
 module_init(fcache_init);
 module_exit(fcache_exit);
+MODULE_LICENSE("GPL");

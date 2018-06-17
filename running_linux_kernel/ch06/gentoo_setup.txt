@@ -9,3 +9,5 @@ crossdev --stable --gcc 5.4.0-r4 -P -v -t aarch64-linux-gnu
 # gdb with xml support
 USE=xml crossdev -P -v -t arm-linux-gnueabi --ex-only --ex-gdb
 USE=xml crossdev -P -v -t aarch64-linux-gnu --ex-only --ex-gdb
+# uninstall
+crossdev --clean aarch64-linux-gnu

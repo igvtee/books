@@ -5,10 +5,11 @@ BUSYBOX_PACKAGE=${BUSYBOX_DIR}.tar.bz2
 
 # environment
 ARCH=arm
-CROSS_COMPILE=arm-linux-gnueabi-
+CROSS_NAME=arm-linux-gnueabi
+CROSS_COMPILE=${CROSS_NAME}-
 export ARCH CROSS_COMPILE
 
-all: busybox linux
+all: initramfs.cpio.gz linux
 
 ${LINUX_PACKAGE}:
 	wget https://www.kernel.org/pub/linux/kernel/v4.x/${LINUX_PACKAGE}
@@ -34,7 +35,15 @@ ${BUSYBOX_DIR}/.config:
 
 busybox: ${BUSYBOX_DIR}/_install/bin/busybox
 
-rootfs: busybox
+rootfs_libs:
+	mkdir -p rootfs/lib
+	cp -af /usr/${CROSS_NAME}/lib/ld-* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/lib/libc-* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/lib/libc.* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/lib/libm-* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/lib/libm.* rootfs/lib
+
+rootfs: busybox rootfs_libs
 	mkdir -p rootfs
 	cp -a ${BUSYBOX_DIR}/_install/* rootfs
 	cd rootfs; mkdir -p etc/init.d dev mnt proc sys tmp lib/modules

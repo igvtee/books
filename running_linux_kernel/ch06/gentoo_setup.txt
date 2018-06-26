@@ -11,3 +11,6 @@ USE=xml crossdev -P -v -t arm-linux-gnueabi --ex-only --ex-gdb
 USE=xml crossdev -P -v -t aarch64-linux-gnu --ex-only --ex-gdb
 # uninstall
 crossdev --clean aarch64-linux-gnu
+# /etc/portage/package.mask/monolithic
+>cross-aarch64-linux-gnu/gcc-5.4.0-r4
+>cross-arm-linux-gnueabi/gcc-5.4.0-r4

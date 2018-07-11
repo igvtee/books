@@ -1,0 +1,72 @@
+1. 訊息顯示
+  1.1 gcc 預定義宏訊息
+    gcc -dM -E - < /dev/null
+  1.2 gcc 執行的子命令
+    gcc -### hello.c
+  1.3 優化級別的對應選項
+    gcc -Q --help=optimizers -O2
+  1.4 彩色診斷訊息
+    可使用GCC_COLORS或使用-fdiagnostics-color來設定
+  1.5 頭文件搜尋路徑
+    gcc -v hello.c
+  1.6 連接庫的具體路徑
+    gcc -print-file-name=libc.a
+2. 預處理
+  2.1 生成沒有行號標記(linemarker)的預處理文件
+    gcc -E hello.c -o hello.i
+    gcc -c hello.i -o hello.o
+    改成
+    gcc -E -P hello.c -o hello.i
+  2.2 在命令行中定義宏
+    gcc -D DEBUG macro.c
+    或
+    gcc -DDEBUG macro.c
+  2.2 在命令行中取消宏
+    gcc -U DEBUG macro.c
+    或
+    gcc -UDEBUG macro.c
+3. 組合語言
+  3.1 把選項傳給組譯器
+    gcc -c -Wa,-L assemble.c
+    objdump -d assemble.o
+  3.2 產生詳細信息的組語文件
+    gcc -S -fverbose-asm assemble.c
+4. 調試
+  4.1 利用address sanitizer工具檢查內存訪問錯誤
+    gcc -fsanitize=address -g -o mem_bug_a mem_bug_a.c
+    gcc -fsanitize=address -g -o mem_bug_b mem_bug_b.c
+  4.2 利用thread sanitizer工具檢查數據競爭的問題
+    gcc -fsanitize=thread -fPIE -pie -g -o thread thread.c -lpthread
+5. 連接器
+  5.1 把選項傳給連接器
+    gcc -Wl,-Map=hello.map hello.c
+  5.2 設置動態連接器
+    gcc hello.c -Wl,-I/home/xmj/tmp/ld-2.15.so -o hello
+    ldd hello
+6. 函數屬性
+  6.1 禁止函數被優化
+    參考used.c
+  6.2 強制函數inline
+    參考inline.c
+7. 常見錯誤
+  7.1 error: cast from ... to ... loses precision
+    g++ error.cc
+    修改錯誤或將錯誤降為警告
+    g++ error.cc -fpermissive
+  7.2 把警告當成錯誤
+    CFLAGS+=-Werror
+    或關閉警告
+    CFLAGS+=-Wno-error
+8. 其他
+  8.1 只做語法檢查
+    gcc -fsyntax-only hello.c
+  8.2 保存臨時文件
+    gcc -save-temps hello.c
+  8.3 開打警告訊息
+    CFLAGS+=-Wall
+  8.4 指定語言類型
+    echo "int x;" | gcc -S -x c -
+    cat ./-.s
+  8.5 改成結構體成員的字節對齊
+    gcc -g -fpack-struct=2 -o pack pack.c
+

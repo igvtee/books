@@ -1,0 +1,11 @@
+*.o
+*.i
+*.s
+*.map
+a.out
+hello
+mem_bug_a
+mem_bug_b
+pack
+thread
+

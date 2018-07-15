@@ -1,0 +1,232 @@
+--- a/linux-4.0/arch/arm/kernel/Makefile
++++ b/linux-4.0/arch/arm/kernel/Makefile
+@@ -13,6 +13,9 @@ endif
+ 
+ CFLAGS_REMOVE_return_address.o = -pg
+ 
++CFLAGS_psci_smp.o = -O
++CFLAGS_psci.o = -O
++
+ # Object file lists.
+ 
+ obj-y		:= elf.o entry-common.o irq.o opcodes.o \
+--- a/linux-4.0/include/linux/compiler.h
++++ b/linux-4.0/include/linux/compiler.h
+@@ -416,6 +416,7 @@ static __always_inline void __write_once
+ # define __compiletime_error_fallback(condition) do { } while (0)
+ #endif
+ 
++#ifdef __OPTIMIZE__
+ #define __compiletime_assert(condition, msg, prefix, suffix)		\
+ 	do {								\
+ 		bool __cond = !(condition);				\
+@@ -439,6 +440,10 @@ static __always_inline void __write_once
+  */
+ #define compiletime_assert(condition, msg) \
+ 	_compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
++#else
++#define compiletime_assert(condition, msg) \
++	do {} while (0)
++#endif
+ 
+ #define compiletime_assert_atomic_type(t)				\
+ 	compiletime_assert(__native_word(t),				\
+--- a/linux-4.0/Makefile
++++ b/linux-4.0/Makefile
+@@ -616,7 +616,7 @@ KBUILD_CFLAGS	+= $(call cc-option,-fno-d
+ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
+ else
+-KBUILD_CFLAGS	+= -O2
++KBUILD_CFLAGS	+= -O0
+ endif
+ 
+ # Tell gcc to never replace conditional load with a non-conditional one
+--- a/linux-4.0/arch/arm/include/asm/highmem.h
++++ b/linux-4.0/arch/arm/include/asm/highmem.h
+@@ -20,7 +20,14 @@
+ extern pte_t *pkmap_page_table;
+ extern pte_t *fixmap_page_table;
+ 
++#ifdef CONFIG_HIGHMEM
+ extern void *kmap_high(struct page *page);
++#else
++static inline void kunmap_high(struct page *page)
++{
++	return;
++}
++#endif
+ extern void kunmap_high(struct page *page);
+ 
+ /*
+@@ -35,7 +42,7 @@ extern void kunmap_high(struct page *pag
+  * the IPI mechanism used by global TLB operations.
+  */
+ #define ARCH_NEEDS_KMAP_HIGH_GET
+-#if defined(CONFIG_SMP) && defined(CONFIG_CPU_TLB_V6)
++#if (defined(CONFIG_SMP) && defined(CONFIG_CPU_TLB_V6)) || !defined(CONFIG_HIGHMEM)
+ #undef ARCH_NEEDS_KMAP_HIGH_GET
+ #if defined(CONFIG_HIGHMEM) && defined(CONFIG_CPU_CACHE_VIVT)
+ #error "The sum of features in your kernel config cannot be supported together"
+--- a/linux-4.0/arch/arm/kernel/traps.c
++++ b/linux-4.0/arch/arm/kernel/traps.c
+@@ -759,6 +759,14 @@ void __bad_xchg(volatile void *ptr, int
+ }
+ EXPORT_SYMBOL(__bad_xchg);
+ 
++void __bad_cmpxchg(volatile void *ptr, int size)
++{
++	printk("cmpxchg: bad data size: pc 0x%p, ptr 0x%p, size %d\n",
++	       __builtin_return_address(0), ptr, size);
++	BUG();
++}
++EXPORT_SYMBOL(__bad_cmpxchg);
++
+ /*
+  * A data abort trap was taken, but we did not handle the instruction.
+  * Try to abort the user program, or panic if it was the kernel.
+--- a/linux-4.0/include/linux/huge_mm.h
++++ b/linux-4.0/include/linux/huge_mm.h
+@@ -1,6 +1,7 @@
+ #ifndef _LINUX_HUGE_MM_H
+ #define _LINUX_HUGE_MM_H
+ 
++#ifdef CONFIG_TRANSPARENT_HUGEPAGE
+ extern int do_huge_pmd_anonymous_page(struct mm_struct *mm,
+ 				      struct vm_area_struct *vma,
+ 				      unsigned long address, pmd_t *pmd,
+@@ -33,6 +34,67 @@ extern int move_huge_pmd(struct vm_area_
+ extern int change_huge_pmd(struct vm_area_struct *vma, pmd_t *pmd,
+ 			unsigned long addr, pgprot_t newprot,
+ 			int prot_numa);
++#else /* !CONFIG_TRANSPARENT_HUGEPAGE */
++static inline int do_huge_pmd_anonymous_page(struct mm_struct *mm,
++				      struct vm_area_struct *vma,
++				      unsigned long address, pmd_t *pmd,
++				      unsigned int flags)
++{
++	return 0;
++}
++
++static inline int do_huge_pmd_wp_page(struct mm_struct *mm, struct vm_area_struct *vma,
++			       unsigned long address, pmd_t *pmd,
++			       pmd_t orig_pmd)
++{
++	return 0;
++}
++
++static inline struct page *follow_trans_huge_pmd(struct vm_area_struct *vma,
++						 unsigned long addr,
++						 pmd_t *pmd,
++						 unsigned int flags)
++{
++	return NULL;
++}
++
++static inline int copy_huge_pmd(struct mm_struct *dst_mm, struct mm_struct *src_mm,
++				pmd_t *dst_pmd, pmd_t *src_pmd, unsigned long addr,
++				struct vm_area_struct *vma)
++{
++	return 0;
++}
++
++static inline int zap_huge_pmd(struct mmu_gather *tlb,
++			       struct vm_area_struct *vma,
++			       pmd_t *pmd, unsigned long addr)
++{
++	return 0;
++}
++
++static inline void huge_pmd_set_accessed(struct mm_struct *mm,
++					 struct vm_area_struct *vma,
++					 unsigned long address, pmd_t *pmd,
++					 pmd_t orig_pmd, int dirty)
++{
++}
++
++static inline  int change_huge_pmd(struct vm_area_struct *vma, pmd_t *pmd,
++				   unsigned long addr, pgprot_t newprot,
++				   int prot_numa)
++{
++	return 0;
++}
++
++static inline  int move_huge_pmd(struct vm_area_struct *vma,
++				 struct vm_area_struct *new_vma,
++				 unsigned long old_addr,
++				 unsigned long new_addr, unsigned long old_end,
++				 pmd_t *old_pmd, pmd_t *new_pmd)
++{
++	return 0;
++}
++#endif /* CONFIG_TRANSPARENT_HUGEPAGE */
+ 
+ enum transparent_hugepage_flag {
+ 	TRANSPARENT_HUGEPAGE_FLAG,
+@@ -51,11 +113,23 @@ enum page_check_address_pmd_flag {
+ 	PAGE_CHECK_ADDRESS_PMD_NOTSPLITTING_FLAG,
+ 	PAGE_CHECK_ADDRESS_PMD_SPLITTING_FLAG,
+ };
++
++#ifdef CONFIG_TRANSPARENT_HUGEPAGE
+ extern pmd_t *page_check_address_pmd(struct page *page,
+ 				     struct mm_struct *mm,
+ 				     unsigned long address,
+ 				     enum page_check_address_pmd_flag flag,
+ 				     spinlock_t **ptl);
++#else /* !CONFIG_TRANSPARENT_HUGEPAGE */
++static inline pmd_t *page_check_address_pmd(struct page *page,
++					    struct mm_struct *mm,
++					    unsigned long address,
++					    enum page_check_address_pmd_flag flag,
++					    spinlock_t **ptl)
++{
++	return NULL;
++}
++#endif /* CONFIG_TRANSPARENT_HUGEPAGE */
+ 
+ #define HPAGE_PMD_ORDER (HPAGE_PMD_SHIFT-PAGE_SHIFT)
+ #define HPAGE_PMD_NR (1<<HPAGE_PMD_ORDER)
+--- a/linux-4.0/include/linux/pagemap.h
++++ b/linux-4.0/include/linux/pagemap.h
+@@ -406,8 +406,16 @@ static inline loff_t page_file_offset(st
+ 	return ((loff_t)page_file_index(page)) << PAGE_CACHE_SHIFT;
+ }
+ 
++#ifdef CONFIG_HUGETLBFS
+ extern pgoff_t linear_hugepage_index(struct vm_area_struct *vma,
+ 				     unsigned long address);
++#else
++static inline pgoff_t linear_hugepage_index(struct vm_area_struct *vma,
++				     unsigned long address)
++{
++	return 0;
++}
++#endif /* CONFIG_HUGETLBFS */
+ 
+ static inline pgoff_t linear_page_index(struct vm_area_struct *vma,
+ 					unsigned long address)
+--- a/linux-4.0/mm/rmap.c
++++ b/linux-4.0/mm/rmap.c
+@@ -1596,4 +1596,10 @@ void hugepage_add_new_anon_rmap(struct p
+ 	atomic_set(&page->_mapcount, 0);
+ 	__hugepage_set_anon_rmap(page, vma, address, 1);
+ }
++#else
++void hugepage_add_anon_rmap(struct page *page,
++			    struct vm_area_struct *vma, unsigned long address)
++{
++	return;
++}
+ #endif /* CONFIG_HUGETLB_PAGE */
+--- a/linux-4.0/fs/Makefile
++++ b/linux-4.0/fs/Makefile
+@@ -19,6 +19,8 @@ else
+ obj-y +=	no-block.o
+ endif
+ 
++CFLAGS_binfmt_elf.o += -O
++
+ obj-$(CONFIG_PROC_FS) += proc_namespace.o
+ 
+ obj-y				+= notify/

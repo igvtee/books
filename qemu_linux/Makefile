@@ -59,6 +59,7 @@ initramfs.cpio.gz: rootfs
 zImage.arm32: ${LINUX_DIR}
 	cd ${LINUX_DIR}; make vexpress_defconfig
 	cd ${LINUX_DIR}; make bzImage dtbs
+	cd ${LINUX_DIR}; make modules
 	cd ${LINUX_DIR}; INSTALL_MOD_PATH="../rootfs" make modules_install
 	cp linux-4.0/arch/arm/boot/zImage $@
 

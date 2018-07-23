@@ -279,7 +279,7 @@ ssize_t sculld_write (struct file *filp, const char __user *buf, size_t count,
  * The ioctl() implementation
  */
 
-int sculld_ioctl (struct inode *inode, struct file *filp,
+long sculld_ioctl (struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
 
@@ -479,7 +479,7 @@ struct file_operations sculld_fops = {
 	.llseek =    sculld_llseek,
 	.read =	     sculld_read,
 	.write =     sculld_write,
-	.ioctl =     sculld_ioctl,
+	.unlocked_ioctl =     sculld_ioctl,
 	.mmap =	     sculld_mmap,
 	.open =	     sculld_open,
 	.release =   sculld_release,

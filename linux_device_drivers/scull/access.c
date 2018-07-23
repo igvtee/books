@@ -80,7 +80,7 @@ struct file_operations scull_sngl_fops = {
 	.llseek =     	scull_llseek,
 	.read =       	scull_read,
 	.write =      	scull_write,
-	.ioctl =      	scull_ioctl,
+	.unlocked_ioctl =      	scull_ioctl,
 	.open =       	scull_s_open,
 	.release =    	scull_s_release,
 };
@@ -142,7 +142,7 @@ struct file_operations scull_user_fops = {
 	.llseek =     scull_llseek,
 	.read =       scull_read,
 	.write =      scull_write,
-	.ioctl =      scull_ioctl,
+	.unlocked_ioctl =      scull_ioctl,
 	.open =       scull_u_open,
 	.release =    scull_u_release,
 };
@@ -215,7 +215,7 @@ struct file_operations scull_wusr_fops = {
 	.llseek =     scull_llseek,
 	.read =       scull_read,
 	.write =      scull_write,
-	.ioctl =      scull_ioctl,
+	.unlocked_ioctl =      scull_ioctl,
 	.open =       scull_w_open,
 	.release =    scull_w_release,
 };
@@ -314,7 +314,7 @@ struct file_operations scull_priv_fops = {
 	.llseek =   scull_llseek,
 	.read =     scull_read,
 	.write =    scull_write,
-	.ioctl =    scull_ioctl,
+	.unlocked_ioctl =    scull_ioctl,
 	.open =     scull_c_open,
 	.release =  scull_c_release,
 };

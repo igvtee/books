@@ -277,7 +277,7 @@ void sbull_invalidate(unsigned long ldev)
  * The ioctl() implementation
  */
 
-int sbull_ioctl (struct inode *inode, struct file *filp,
+long sbull_ioctl (struct file *filp,
                  unsigned int cmd, unsigned long arg)
 {
 	long size;
@@ -316,7 +316,7 @@ static struct block_device_operations sbull_ops = {
 	.release 	 = sbull_release,
 	.media_changed   = sbull_media_changed,
 	.revalidate_disk = sbull_revalidate,
-	.ioctl	         = sbull_ioctl
+	.unlocked_ioctl	         = sbull_ioctl
 };
 
 

@@ -261,7 +261,7 @@ static struct scull_dev *scull_c_lookfor_device(dev_t key)
 	memset(lptr, 0, sizeof(struct scull_listitem));
 	lptr->key = key;
 	scull_trim(&(lptr->device)); /* initialize it */
-	init_MUTEX(&(lptr->device.sem));
+	sema_init(&(lptr->device.sem), 1);
 
 	/* place it in the list */
 	list_add(&lptr->list, &scull_c_list);
@@ -347,7 +347,7 @@ static void scull_access_setup (dev_t devno, struct scull_adev_info *devinfo)
 	/* Initialize the device structure */
 	dev->quantum = scull_quantum;
 	dev->qset = scull_qset;
-	init_MUTEX(&dev->sem);
+	sema_init(&dev->sem, 1);
 
 	/* Do the cdev stuff. */
 	cdev_init(&dev->cdev, devinfo->fops);

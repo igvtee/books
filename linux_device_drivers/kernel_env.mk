@@ -21,3 +21,4 @@ install:
 	INSTALL_MOD_PATH=$(INSTALLDIR) $(MAKE) -C $(KERNELDIR) M=$(CURDIR) modules_install
 	@[ -z "$(CROSS_PROGS)" ] || cp $(CROSS_PROGS) -f $(INSTALLDIR)/usr/bin/
 	@[ -z "$(SCRIPT_FILES)" ] || cp $(SCRIPT_FILES) -f $(INSTALLDIR)/usr/bin/
+	@[ -z "$(SCRIPT_FILES)" ] || cd $(INSTALLDIR)/usr/bin/ && chmod +x $(SCRIPT_FILES)

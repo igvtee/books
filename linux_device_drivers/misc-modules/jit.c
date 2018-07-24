@@ -261,15 +261,15 @@ int jit_tasklet(char *buf, char **start, off_t offset,
 
 int __init jit_init(void)
 {
-	create_proc_read_entry("currentime", 0, NULL, jit_currentime, NULL);
-	create_proc_read_entry("jitbusy", 0, NULL, jit_fn, (void *)JIT_BUSY);
-	create_proc_read_entry("jitsched",0, NULL, jit_fn, (void *)JIT_SCHED);
-	create_proc_read_entry("jitqueue",0, NULL, jit_fn, (void *)JIT_QUEUE);
-	create_proc_read_entry("jitschedto", 0, NULL, jit_fn, (void *)JIT_SCHEDTO);
+	proc_create_data("currentime", 0, NULL, jit_currentime, NULL);
+	proc_create_data("jitbusy", 0, NULL, jit_fn, (void *)JIT_BUSY);
+	proc_create_data("jitsched",0, NULL, jit_fn, (void *)JIT_SCHED);
+	proc_create_data("jitqueue",0, NULL, jit_fn, (void *)JIT_QUEUE);
+	proc_create_data("jitschedto", 0, NULL, jit_fn, (void *)JIT_SCHEDTO);
 
-	create_proc_read_entry("jitimer", 0, NULL, jit_timer, NULL);
-	create_proc_read_entry("jitasklet", 0, NULL, jit_tasklet, NULL);
-	create_proc_read_entry("jitasklethi", 0, NULL, jit_tasklet, (void *)1);
+	proc_create_data("jitimer", 0, NULL, jit_timer, NULL);
+	proc_create_data("jitasklet", 0, NULL, jit_tasklet, NULL);
+	proc_create_data("jitasklethi", 0, NULL, jit_tasklet, (void *)1);
 
 	return 0; /* success */
 }

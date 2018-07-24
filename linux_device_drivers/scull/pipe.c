@@ -367,7 +367,7 @@ int scull_p_init(dev_t firstdev)
 		scull_p_setup_cdev(scull_p_devices + i, i);
 	}
 #ifdef SCULL_DEBUG
-	create_proc_read_entry("scullpipe", 0, NULL, scull_read_p_mem, NULL);
+	proc_create_data("scullpipe", 0, NULL, scull_read_p_mem, NULL);
 #endif
 	return scull_p_nr_devs;
 }

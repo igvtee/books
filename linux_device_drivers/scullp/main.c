@@ -565,7 +565,7 @@ int scullp_init(void)
 
 
 #ifdef SCULLP_USE_PROC /* only when available */
-	create_proc_read_entry("scullpmem", 0, NULL, scullp_read_procmem, NULL);
+	proc_create_data("scullpmem", 0, NULL, scullp_read_procmem, NULL);
 #endif
 	return 0; /* succeed */
 

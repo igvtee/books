@@ -564,7 +564,7 @@ int scullv_init(void)
 
 
 #ifdef SCULLV_USE_PROC /* only when available */
-	create_proc_read_entry("scullvmem", 0, NULL, scullv_read_procmem, NULL);
+	proc_create_data("scullvmem", 0, NULL, scullv_read_procmem, NULL);
 #endif
 	return 0; /* succeed */
 

@@ -1,13 +1,19 @@
+ifneq ($(KERNELRELEASE),)
+# Kernel modules
+obj-m	:=
+scull-objs	:=
 
-FILES = nbtest load50 mapcmp polltest mapper setlevel setconsole inp outp \
-	datasize dataalign netifdebug
+# Specify flags for the module compilation.
+EXTRA_CFLAGS +=
 
-KERNELDIR ?= /lib/modules/$(shell uname -r)/build
-INCLUDEDIR = $(KERNELDIR)/include
-CFLAGS = -O2 -fomit-frame-pointer -Wall -I$(INCLUDEDIR)
+else # KERNELRELEASE
 
-all: $(FILES)
+CROSS_PROGS := nbtest load50 mapcmp polltest mapper setlevel setconsole inp outp datasize dataalign netifdebug
+HOST_PROGS :=
+SCRIPT_FILES :=
+CFLAGS += -O2 -fomit-frame-pointer -Wall -I$(KERNELDIR)/include
+LDFLAGS +=
 
-clean:
-	rm -f $(FILES) *~ core
+include ../kernel_env.mk
 
+endif # KERNELRELEASE

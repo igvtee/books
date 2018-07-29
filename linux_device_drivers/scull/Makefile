@@ -1,5 +1,5 @@
 # Comment/uncomment the following line to disable/enable debugging
-#DEBUG = y
+DEBUG = y
 
 # Add your debugging flag (or not) to CFLAGS
 ifeq ($(DEBUG),y)
@@ -14,7 +14,7 @@ obj-m	:= scull.o
 scull-objs	:= main.o pipe.o access.o
 
 # Specify flags for the module compilation.
-EXTRA_CFLAGS += $(DEBFLAGS) -I$$PWD/../include
+EXTRA_CFLAGS += -Wall -Werror $(DEBFLAGS) -I$$PWD/../include
 
 else # KERNELRELEASE
 

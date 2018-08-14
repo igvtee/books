@@ -3,6 +3,11 @@
 #include <linux/init.h>		/* module_init */
 #include <linux/module.h>	/* MODULE_XXXX */
 #include <linux/slab.h>		/* kmalloc */
+#include <linux/proc_fs.h>	/* proc_create */
+#include <asm/uaccess.h>	/* copy_XXXX_user */
+#include <linux/stat.h>		/* S_IRUGO */
+
+#define PROC_NAME "test_slub"
 
 #define TRACK_ADDRS_COUNT 16
 struct track {
@@ -100,19 +105,20 @@ static void kmalloc_oob_padding(void)
 static void kmalloc_object_padding(void)
 {
 	char *ptr;
+	size_t size = 32;
 
-	ptr = kmem_cache_alloc(slab, GFP_KERNEL);
+	ptr = kmalloc(size, GFP_KERNEL);
 	if (!ptr) {
 		pr_err("Allocation failed\n");
 		return;
 	}
-	pr_info("in object padding no error. size: %zu\n", ksize(ptr));
+	pr_info("kmalloc size %zu. got size: %zu\n", size, ksize(ptr));
 
 	/* we need 32. but system gave us 64. so it fine to use
 	 * up to 64 without error
 	 */
 	memset(ptr, 'E', ksize(ptr));
-	kmem_cache_free(slab, ptr);
+	kfree(ptr);
 }
 
 /* Poison overwritten */
@@ -147,25 +153,112 @@ static void kmalloc_double_free(void)
 	kmem_cache_free(slab, ptr);
 }
 
+static ssize_t test_slub_proc_read(struct file *file, char __user *buf,
+				 size_t size, loff_t *offset)
+{
+	char *msg = "1: object padding test no error.\n"
+		"2: out-of-bounds to right.\n"
+		"3: out-of-bounds to left.\n"
+		"4: out-of-bounds to free pointer.\n"
+		"5: out-of-bounds to padding.\n"
+		"6: use-after-free.\n"
+		"7: double-free.\n";
+	int len;
+
+	/* only read once. then EOF */
+	if (*offset)
+		return 0;
+
+	len = strlen(msg);
+	if (len > size)
+		len = size;
+	if (copy_to_user(buf, msg, len))
+		return -EFAULT;
+
+	return len;
+}
+
+static ssize_t test_slub_proc_write(struct file *filp, const char __user *buf,
+			      size_t count, loff_t *pos)
+{
+	unsigned char *kbuf;
+	unsigned long item;
+	ssize_t retval;
+
+	kbuf = kmalloc(count, GFP_KERNEL);
+	if (!kbuf)
+		return -ENOMEM;
+
+	if (copy_from_user(kbuf, buf, count)) {
+		retval = -EFAULT;
+		goto out;
+	}
+	kbuf[count-1] = '\0';
+	if (kstrtoul(kbuf, 0, &item)) {
+		retval = -EINVAL;
+		goto out;
+	}
+
+	switch (item) {
+	case 1:
+		kmalloc_object_padding();
+		break;
+	case 2:
+		kmalloc_oob_right();
+		break;
+	case 3:
+		kmalloc_oob_left();
+		break;
+	case 4:
+		kmalloc_oob_fp();
+		break;
+	case 5:
+		kmalloc_oob_padding();
+		break;
+	case 6:
+		kmalloc_uaf();
+		break;
+	case 7:
+		kmalloc_double_free();
+		break;
+	default:
+		printk("c");
+		retval = -EINVAL;
+		goto out;
+		break;
+	}
+
+	retval = count;
+out:
+	kfree(kbuf);
+	return retval; /* succeed, to avoid retrial */
+}
+
+static struct file_operations test_slub_proc_ops = {
+        .owner	= THIS_MODULE,
+        .read	= test_slub_proc_read,
+        .write	= test_slub_proc_write,
+};
+
+
 static int __init test_slub_init(void)
 {
 	slab = kmem_cache_create("test_slub", 17, 0, 0, NULL);
 	if (!slab)
 		return -ENOMEM;
 
-	kmalloc_object_padding();
-	kmalloc_oob_right();
-	kmalloc_oob_left();
-	kmalloc_oob_fp();
-	kmalloc_oob_padding();
-	kmalloc_uaf();
-	kmalloc_double_free();
+	if (!proc_create(PROC_NAME, S_IRUGO | S_IWUGO, NULL,
+			 &test_slub_proc_ops)) {
+		printk(KERN_ERR "proc_create failed\n");
+		return -ENOMEM;
+	}
 
 	return 0;
 }
 
 static void __exit test_slub_exit(void)
 {
+	remove_proc_entry(PROC_NAME, NULL);
 	kmem_cache_destroy(slab);
 }
 

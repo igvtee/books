@@ -6,6 +6,7 @@
 #include <linux/proc_fs.h>	/* proc_create */
 #include <asm/uaccess.h>	/* copy_XXXX_user */
 #include <linux/stat.h>		/* S_IRUGO */
+#include <linux/gfp.h>		/* __get_free_page */
 
 #define PROC_NAME "test_slub"
 
@@ -153,6 +154,19 @@ static void kmalloc_double_free(void)
 	kmem_cache_free(slab, ptr);
 }
 
+/* CONFIG_DEBUG_PAGEALLOC */
+static void debug_page_alloc(void)
+{
+	char *buf;
+
+	pr_info("pagealloc: use-after-free\n");
+	buf = (char *)__get_free_page(GFP_KERNEL);
+	if (!buf)
+		return;
+	free_page((unsigned long)buf);
+	buf[0] = 'E';
+}
+
 static ssize_t test_slub_proc_read(struct file *file, char __user *buf,
 				 size_t size, loff_t *offset)
 {
@@ -162,7 +176,8 @@ static ssize_t test_slub_proc_read(struct file *file, char __user *buf,
 		"4: out-of-bounds to free pointer.\n"
 		"5: out-of-bounds to padding.\n"
 		"6: use-after-free.\n"
-		"7: double-free.\n";
+		"7: double-free.\n"
+		"8: debug pagealloc.\n";
 	int len;
 
 	/* only read once. then EOF */
@@ -220,6 +235,9 @@ static ssize_t test_slub_proc_write(struct file *filp, const char __user *buf,
 		break;
 	case 7:
 		kmalloc_double_free();
+		break;
+	case 8:
+		debug_page_alloc();
 		break;
 	default:
 		printk("c");

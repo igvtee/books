@@ -3,9 +3,20 @@ LINUX_PACKAGE=${LINUX_DIR}.tar.gz
 BUSYBOX_DIR=busybox-1.24.0
 BUSYBOX_PACKAGE=${BUSYBOX_DIR}.tar.bz2
 
-# environment
 ARCH=arm
-CROSS_NAME=arm-linux-gnueabi
+# environment
+ifeq (${ARCH},arm)
+  CROSS_NAME=arm-linux-gnueabi
+  LIBC_PATH=lib
+endif
+ifeq (${ARCH},arm64)
+  CROSS_NAME=aarch64-linux-gnu
+  LIBC_PATH=lib64
+endif
+ifeq (${ARCH},x86)
+  CROSS_NAME=
+  LIBC_PATH=lib64
+endif
 CROSS_COMPILE=${CROSS_NAME}-
 export ARCH CROSS_COMPILE
 
@@ -25,27 +36,28 @@ ${BUSYBOX_DIR}: ${BUSYBOX_PACKAGE}
 	tar jvxf ${BUSYBOX_PACKAGE}
 	touch ${BUSYBOX_DIR}
 
-${BUSYBOX_DIR}/_install/bin/busybox: ${BUSYBOX_DIR} ${BUSYBOX_DIR}/.config
-	make -C ${BUSYBOX_DIR} install
+build/${ARCH}/busybox/_install/bin/busybox: ${BUSYBOX_DIR} build/${ARCH}/busybox/.config
+	cd build/${ARCH}/busybox && make install
 
-${BUSYBOX_DIR}/.config:
-	cd ${BUSYBOX_DIR}; make defconfig
-	sed -i -e 's/.*\(CONFIG_STATIC\).*/\1=y/' ${BUSYBOX_DIR}/.config
-	cd ${BUSYBOX_DIR}; make oldconfig 
+build/${ARCH}/busybox/.config:
+	mkdir -p build/${ARCH}/busybox
+	cd ${BUSYBOX_DIR} && make O=${shell pwd}/build/${ARCH}/busybox defconfig
+	sed -i -e 's/.*\(CONFIG_STATIC\).*/\1=y/' build/${ARCH}/busybox/.config
+	cd ${BUSYBOX_DIR} && make O=${shell pwd}/build/${ARCH}/busybox oldconfig
 
-busybox: ${BUSYBOX_DIR}/_install/bin/busybox
+busybox: build/${ARCH}/busybox/_install/bin/busybox
 
 rootfs_libs:
 	mkdir -p rootfs/lib
-	cp -af /usr/${CROSS_NAME}/lib/ld-* rootfs/lib
-	cp -af /usr/${CROSS_NAME}/lib/libc-* rootfs/lib
-	cp -af /usr/${CROSS_NAME}/lib/libc.* rootfs/lib
-	cp -af /usr/${CROSS_NAME}/lib/libm-* rootfs/lib
-	cp -af /usr/${CROSS_NAME}/lib/libm.* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/ld-* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/libc-* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/libc.* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/libm-* rootfs/lib
+	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/libm.* rootfs/lib
 
 rootfs: busybox rootfs_libs
 	mkdir -p rootfs
-	cp -a ${BUSYBOX_DIR}/_install/* rootfs
+	cp -a build/${ARCH}/busybox/_install/* rootfs
 	cd rootfs; mkdir -p etc/init.d dev mnt proc sys tmp lib/modules
 	echo -e "/bin/mount -a\necho /sbin/mdev > /proc/sys/kernel/hotplug\nmdev -s" > rootfs/etc/init.d/rcS
 	chmod +x rootfs/etc/init.d/rcS
@@ -56,11 +68,24 @@ rootfs: busybox rootfs_libs
 initramfs.cpio.gz: rootfs
 	cd rootfs; find . -print0 | cpio --null -ov --format=newc | gzip -9 > ../initramfs.cpio.gz
 
-zImage.arm32: ${LINUX_DIR}
-	cd ${LINUX_DIR}; make vexpress_defconfig
-	cd ${LINUX_DIR}; make bzImage dtbs
-	cd ${LINUX_DIR}; make modules
-	cd ${LINUX_DIR}; INSTALL_MOD_PATH="../rootfs" make modules_install
-	cp linux-4.0/arch/arm/boot/zImage $@
+zImage.arm: ${LINUX_DIR}
+	mkdir -p build/${ARCH}/linux
+	cd ${LINUX_DIR}; make mrproper
+	$(if $(wildcard build/${ARCH}/linux/.config), \
+	  cd ${LINUX_DIR}; make O=${shell pwd}/build/${ARCH}/linux/ oldconfig , \
+	  cd ${LINUX_DIR}; make O=${shell pwd}/build/${ARCH}/linux/ vexpress_defconfig)
+	cd build/${ARCH}/linux/; make all
+	cd build/${ARCH}/linux/; INSTALL_MOD_PATH="../../../../rootfs" make modules_install
+	cp build/${ARCH}/linux/arch/${ARCH}/boot/zImage $@
 
-linux: zImage.arm32
+zImage.arm64: ${LINUX_DIR}
+	mkdir -p build/${ARCH}/linux
+	cd ${LINUX_DIR}; make mrproper
+	$(if $(wildcard build/${ARCH}/linux/.config), \
+	  cd ${LINUX_DIR}; make O=${shell pwd}/build/${ARCH}/linux/ oldconfig , \
+	  cd ${LINUX_DIR}; make O=${shell pwd}/build/${ARCH}/linux/ defconfig)
+	cd build/${ARCH}/linux/; make all
+	cd build/${ARCH}/linux/; INSTALL_MOD_PATH="../../../../rootfs" make modules_install
+	cp build/${ARCH}/linux/arch/${ARCH}/boot/Image.gz $@
+
+linux: zImage.${ARCH}

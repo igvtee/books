@@ -4,4 +4,6 @@
 /linux-4.0
 /linux-4.0.tar.gz
 /rootfs
-/zImage.arm32
+/zImage.arm
+/zImage.arm64
+/build

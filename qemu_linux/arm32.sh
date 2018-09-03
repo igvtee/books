@@ -6,6 +6,11 @@ qemu-system-arm -M vexpress-a9 -smp 4 -m 512M -kernel zImage.arm -initrd initram
 # target remote 127.0.0.1:1234
 # b start_kernel
 #
+# kgdb directly connect port
+# set debug remote 1 (print remote debug message)
+# set remotebaud 115200
+# target remote /dev/ttyS0
+#
 # kernel module gdb
 # b sys_init_module
 # modprobe sequence

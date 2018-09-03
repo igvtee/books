@@ -6,9 +6,11 @@ equery meta sys-devel/gcc
 # gcc
 crossdev --stable --binutils 2.29.1-r1 --gcc 5.4.0-r4 --kernel 3.18 --libc 2.25-r11 -P -v -t arm-linux-gnueabi
 crossdev --stable --binutils 2.29.1-r1 --gcc 5.4.0-r4 --kernel 3.18 --libc 2.25-r11 -P -v -t aarch64-linux-gnu
-# gdb with xml support
+# gdb with xml support on host
 USE=xml crossdev -P -v -t arm-linux-gnueabi --ex-only --ex-gdb
 USE=xml crossdev -P -v -t aarch64-linux-gnu --ex-only --ex-gdb
+# build strace on target
+arm-linux-gnueabi-emerge strace
 # uninstall
 crossdev --clean aarch64-linux-gnu
 # /etc/portage/package.mask/monolithic

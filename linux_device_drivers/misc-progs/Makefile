@@ -8,7 +8,7 @@ EXTRA_CFLAGS +=
 
 else # KERNELRELEASE
 
-CROSS_PROGS := nbtest load50 mapcmp polltest mapper setlevel setconsole inp outp datasize dataalign netifdebug
+CROSS_PROGS := nbtest load50 mapcmp polltest mapper setlevel setconsole inp outp datasize dataalign netifdebug asynctest
 HOST_PROGS :=
 SCRIPT_FILES :=
 CFLAGS += -O2 -fomit-frame-pointer -Wall -I$(KERNELDIR)/include

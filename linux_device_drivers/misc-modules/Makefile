@@ -11,7 +11,7 @@ ifneq ($(KERNELRELEASE),)
 #obj-m := hello.o hellop.o seq.o jit.o jiq.o sleepy.o complete.o \
 #         silly.o faulty.o kdatasize.o kdataalign.o
 obj-m := hello.o sequence.o faulty.o complete.o counter.o test_slub.o \
-	sleepy.o jit.o
+	sleepy.o jit.o jiq.o
 
 # Specify flags for the module compilation.
 EXTRA_CFLAGS +=

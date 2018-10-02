@@ -65,10 +65,6 @@ static ssize_t jit_fn(struct file *file, char __user *buf,
 	char msg[64];
 	int len;
 
-	/* only read once. then EOF */
-	if (*offset)
-		return 0;
-
 	init_waitqueue_head (&wait);
 	j0 = jiffies;
 	j1 = j0 + delay;
@@ -87,13 +83,14 @@ static ssize_t jit_fn(struct file *file, char __user *buf,
 			wait_event_interruptible_timeout(wait, 0, delay);
 			break;
 		case JIT_SCHEDTO:
+			/* schedule_timeout/msleep/ssleep */
 			set_current_state(TASK_INTERRUPTIBLE);
 			schedule_timeout (delay);
 			break;
 	}
 	j1 = jiffies; /* actual value after we delayed */
 
-	len = snprintf(msg, sizeof(msg), "%9li %9li\n", j0, j1);
+	len = snprintf(msg, sizeof(msg), "%9lu %9lu\n", j0, j1);
 
 	if (len > sizeof(msg))
 		len = sizeof(msg);
@@ -117,10 +114,6 @@ static ssize_t jit_currentime(struct file *file, char __user *buf,
 	u64 j2;
 	char msg[128];
 	int len;
-
-	/* only read once. then EOF */
-	if (*offset)
-		return 0;
 
 	/* get them four */
 	j1 = jiffies;
@@ -168,7 +161,7 @@ void jit_timer_fn(unsigned long arg)
 {
 	struct jit_data *data = (struct jit_data *)arg;
 	unsigned long j = jiffies;
-	seq_printf(data->seq, "%9li  %3li     %i    %6i   %i   %s\n",
+	seq_printf(data->seq, "%9lu  %3lu     %i    %6i   %i   %s\n",
 			     j, j - data->prevjiffies, in_interrupt() ? 1 : 0,
 			     current->pid, smp_processor_id(), current->comm);
 
@@ -196,7 +189,7 @@ static int jit_timer(struct seq_file *s, void *v)
 
 	/* write the first lines in the buffer */
 	seq_printf(s, "   time   delta  inirq    pid   cpu command\n");
-	seq_printf(s, "%9li  %3li     %i    %6i   %i   %s\n",
+	seq_printf(s, "%9lu  %3lu     %i    %6i   %i   %s\n",
 			j, 0L, in_interrupt() ? 1 : 0,
 			current->pid, smp_processor_id(), current->comm);
 
@@ -223,7 +216,7 @@ static void jit_tasklet_fn(unsigned long arg)
 {
 	struct jit_data *data = (struct jit_data *)arg;
 	unsigned long j = jiffies;
-	seq_printf(data->seq, "%9li  %3li     %i    %6i   %i   %s\n",
+	seq_printf(data->seq, "%9lu  %3lu     %i    %6i   %i   %s\n",
 			     j, j - data->prevjiffies, in_interrupt() ? 1 : 0,
 			     current->pid, smp_processor_id(), current->comm);
 
@@ -253,7 +246,7 @@ static int jit_tasklet(struct seq_file *s, void *v)
 
 	/* write the first lines in the buffer */
 	seq_printf(s, "   time   delta  inirq    pid   cpu command\n");
-	seq_printf(s, "%9li  %3li     %i    %6i   %i   %s\n",
+	seq_printf(s, "%9lu  %3lu     %i    %6i   %i   %s\n",
 			j, 0L, in_interrupt() ? 1 : 0,
 			current->pid, smp_processor_id(), current->comm);
 

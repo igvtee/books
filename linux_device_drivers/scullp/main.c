@@ -27,6 +27,7 @@
 #include <linux/fcntl.h>	/* O_ACCMODE */
 #include <linux/aio.h>
 #include <asm/uaccess.h>
+#include <linux/seq_file.h>
 #include "scullp.h"		/* local definitions */
 
 
@@ -57,59 +58,31 @@ void scullp_cleanup(void);
  * The proc filesystem: function to read and entry
  */
 
-void scullp_proc_offset(char *buf, char **start, off_t *offset, int *len)
-{
-	if (*offset == 0)
-		return;
-	if (*offset >= *len) {
-		/* Not there yet */
-		*offset -= *len;
-		*len = 0;
-	} else {
-		/* We're into the interesting stuff now */
-		*start = buf + *offset;
-		*offset = 0;
-	}
-}
-
 /* FIXME: Do we need this here??  It be ugly  */
-int scullp_read_procmem(char *buf, char **start, off_t offset,
-                   int count, int *eof, void *data)
+static int scullp_read_procmem(struct seq_file *s, void *v)
 {
-	int i, j, order, qset, len = 0;
-	int limit = count - 80; /* Don't print more than this */
+	int i, j, order, qset;
 	struct scullp_dev *d;
 
-	*start = buf;
 	for(i = 0; i < scullp_devs; i++) {
 		d = &scullp_devices[i];
 		if (down_interruptible (&d->sem))
 			return -ERESTARTSYS;
 		qset = d->qset;  /* retrieve the features of each device */
 		order = d->order;
-		len += sprintf(buf+len,"\nDevice %i: qset %i, order %i, sz %li\n",
+		seq_printf(s,"\nDevice %i: qset %i, order %i, sz %li\n",
 				i, qset, order, (long)(d->size));
 		for (; d; d = d->next) { /* scan the list */
-			len += sprintf(buf+len,"  item at %p, qset at %p\n",d,d->data);
-			scullp_proc_offset (buf, start, &offset, &len);
-			if (len > limit)
-				goto out;
+			seq_printf(s,"  item at %p, qset at %p\n",d,d->data);
 			if (d->data && !d->next) /* dump only the last item - save space */
 				for (j = 0; j < qset; j++) {
 					if (d->data[j])
-						len += sprintf(buf+len,"    % 4i:%8p\n",j,d->data[j]);
-					scullp_proc_offset (buf, start, &offset, &len);
-					if (len > limit)
-						goto out;
+						seq_printf(s,"    % 4i:%8p\n",j,d->data[j]);
 				}
 		}
-	  out:
 		up (&scullp_devices[i].sem);
-		if (len > limit)
-			break;
 	}
-	*eof = 1;
-	return len;
+	return 0;
 }
 
 #endif /* SCULLP_USE_PROC */
@@ -399,31 +372,43 @@ loff_t scullp_llseek (struct file *filp, loff_t off, int whence)
 struct async_work {
 	struct kiocb *iocb;
 	int result;
-	struct work_struct work;
+	struct delayed_work work;
 };
 
 /*
  * "Complete" an asynchronous operation.
  */
-static void scullp_do_deferred_op(void *p)
+static void scullp_do_deferred_op(struct work_struct *work)
 {
-	struct async_work *stuff = (struct async_work *) p;
+	struct async_work *stuff = container_of(work, struct async_work,
+						work.work);
 	aio_complete(stuff->iocb, stuff->result, 0);
 	kfree(stuff);
 }
 
 
-static int scullp_defer_op(int write, struct kiocb *iocb, char __user *buf,
-		size_t count, loff_t pos)
+static int scullp_defer_op(int write, struct kiocb *iocb,
+			   const struct iovec *iov, unsigned long nr_segs,
+			   loff_t pos)
 {
 	struct async_work *stuff;
 	int result;
+	ssize_t len;
+	unsigned long seg;
 
 	/* Copy now while we can access the buffer */
-	if (write)
-		result = scullp_write(iocb->ki_filp, buf, count, &pos);
-	else
-		result = scullp_read(iocb->ki_filp, buf, count, &pos);
+	for (seg = len = result = 0; seg < nr_segs; seg++) {
+		if (write)
+			result = scullp_write(iocb->ki_filp, iov[seg].iov_base,
+					      iov[seg].iov_len, &pos);
+		else
+			result = scullp_read(iocb->ki_filp, iov[seg].iov_base,
+					     iov[seg].iov_len, &pos);
+		if (len < 0)
+			return len;
+
+		result += len;
+	}
 
 	/* If this is a synchronous IOCB, we return our status now. */
 	if (is_sync_kiocb(iocb))
@@ -435,22 +420,22 @@ static int scullp_defer_op(int write, struct kiocb *iocb, char __user *buf,
 		return result; /* No memory, just complete now */
 	stuff->iocb = iocb;
 	stuff->result = result;
-	INIT_WORK(&stuff->work, scullp_do_deferred_op, stuff);
+	INIT_DELAYED_WORK(&stuff->work, scullp_do_deferred_op);
 	schedule_delayed_work(&stuff->work, HZ/100);
 	return -EIOCBQUEUED;
 }
 
 
-static ssize_t scullp_aio_read(struct kiocb *iocb, char __user *buf, size_t count,
-		loff_t pos)
+static ssize_t scullp_aio_read(struct kiocb *iocb, const struct iovec *iov,
+			       unsigned long nr_segs, loff_t pos)
 {
-	return scullp_defer_op(0, iocb, buf, count, pos);
+	return scullp_defer_op(0, iocb, iov, nr_segs, pos);
 }
 
-static ssize_t scullp_aio_write(struct kiocb *iocb, const char __user *buf,
-		size_t count, loff_t pos)
+static ssize_t scullp_aio_write(struct kiocb *iocb, const struct iovec *iov,
+				unsigned long nr_segs, loff_t pos)
 {
-	return scullp_defer_op(1, iocb, (char __user *) buf, count, pos);
+	return scullp_defer_op(1, iocb, iov, nr_segs, pos);
 }
 
 
@@ -522,6 +507,19 @@ static void scullp_setup_cdev(struct scullp_dev *dev, int index)
 		printk(KERN_NOTICE "Error %d adding scull%d", err, index);
 }
 
+static int scullp_procmem_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, scullp_read_procmem, NULL);
+}
+
+static struct file_operations scullp_procmem_ops = {
+	.owner   = THIS_MODULE,
+	.open    = scullp_procmem_open,
+	.read    = seq_read,
+	.llseek  = seq_lseek,
+	.release = single_release
+};
+
 
 
 /*
@@ -565,7 +563,7 @@ int scullp_init(void)
 
 
 #ifdef SCULLP_USE_PROC /* only when available */
-	proc_create_data("scullpmem", 0, NULL, scullp_read_procmem, NULL);
+	proc_create("scullpmem", 0, NULL, &scullp_procmem_ops);
 #endif
 	return 0; /* succeed */
 

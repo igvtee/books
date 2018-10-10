@@ -1,6 +1,6 @@
 
 # Comment/uncomment the following line to enable/disable debugging
-#DEBUG = y
+DEBUG = y
 
 
 ifeq ($(DEBUG),y)
@@ -9,38 +9,20 @@ else
   DEBFLAGS = -O2
 endif
 
-CFLAGS += $(DEBFLAGS) -I$(LDDINC)
-
-TARGET = scullc
-
 ifneq ($(KERNELRELEASE),)
 
 scullc-objs := main.o
-
 obj-m	:= scullc.o
+EXTRA_CFLAGS += -Wall -Werror $(DEBFLAGS) -I$$PWD/../include
 
 else
 
-KERNELDIR ?= /lib/modules/$(shell uname -r)/build
-PWD       := $(shell pwd)
+CROSS_PROGS :=
+HOST_PROGS :=
+SCRIPT_FILES := scullc_load scullc_unload
+CFLAGS +=
+LDFLAGS +=
 
-modules:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) LDDINC=$(PWD) modules
+include ../kernel_env.mk
 
-endif
-
-
-install:
-	install -d $(INSTALLDIR)
-	install -c $(TARGET).o $(INSTALLDIR)
-
-clean:
-	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions
-
-
-depend .depend dep:
-	$(CC) $(CFLAGS) -M *.c > .depend
-
-ifeq (.depend,$(wildcard .depend))
-include .depend
 endif

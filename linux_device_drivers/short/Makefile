@@ -9,8 +9,7 @@ else
   DEBFLAGS = -O2
 endif
 
-CFLAGS += $(DEBFLAGS)
-CFLAGS += -I..
+EXTRA_CFLAGS += -Wall -Werror $(DEBFLAGS) -I..
 
 ifneq ($(KERNELRELEASE),)
 # call from kernel build system

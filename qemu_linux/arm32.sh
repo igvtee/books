@@ -1,5 +1,10 @@
 #!/bin/sh
-qemu-system-arm -M vexpress-a9 -smp 4 -m 512M -kernel zImage.arm -initrd initramfs.cpio.gz -append "rdinit=/linuxrc console=ttyAMA0 loglevel=8 earlyprintk" -dtb build/arm/linux/arch/arm/boot/dts/vexpress-v2p-ca9.dtb -nographic
+qemu-system-arm -M vexpress-a9 -smp 4 -m 512M \
+	-kernel zImage.arm -initrd initramfs.cpio.gz \
+	-append "rdinit=/linuxrc console=ttyAMA0 loglevel=8 earlyprintk" \
+	-dtb build/arm/linux/arch/arm/boot/dts/vexpress-v2p-ca9.dtb \
+	-nographic \
+	-device virtio-net-device,netdev=net0 -netdev user,id=net0
 
 # kernel gdb
 # arm-linux-gnueabi-gdb ./vmlinux

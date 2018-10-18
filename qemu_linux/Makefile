@@ -58,6 +58,8 @@ rootfs_libs:
 rootfs: busybox rootfs_libs
 	mkdir -p rootfs
 	cp -a build/${ARCH}/busybox/_install/* rootfs
+	mkdir -p rootfs/usr/share/udhcpc/
+	cp ${BUSYBOX_DIR}/examples/udhcp/simple.script rootfs/usr/share/udhcpc/default.script
 	cd rootfs; mkdir -p etc/init.d dev mnt proc sys tmp lib/modules
 	echo -e "/bin/mount -a\necho /sbin/mdev > /proc/sys/kernel/hotplug\nmdev -s" > rootfs/etc/init.d/rcS
 	chmod +x rootfs/etc/init.d/rcS

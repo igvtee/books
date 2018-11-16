@@ -13,6 +13,15 @@ USE=xml crossdev -P -v -t aarch64-linux-gnu --ex-only --ex-gdb
 arm-linux-gnueabi-emerge strace
 # uninstall
 crossdev --clean aarch64-linux-gnu
-# /etc/portage/package.mask/monolithic
->cross-aarch64-linux-gnu/gcc-5.4.0-r4
+
+# /etc/portage/package.mask/cross-arm-linux-gnueabi
+>cross-arm-linux-gnueabi/binutils-2.29.1-r1
 >cross-arm-linux-gnueabi/gcc-5.4.0-r4
+>cross-arm-linux-gnueabi/linux-headers-3.18
+>cross-arm-linux-gnueabi/glibc-2.25-r11
+
+# /etc/portage/package.mask/cross-aarch64-linux-gnu
+>cross-aarch64-linux-gnu/binutils-2.29.1-r1
+>cross-aarch64-linux-gnu/gcc-5.4.0-r4
+>cross-aarch64-linux-gnu/linux-headers-3.18
+>cross-aarch64-linux-gnu/glibc-2.25-r11

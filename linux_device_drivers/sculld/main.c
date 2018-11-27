@@ -27,6 +27,7 @@
 #include <linux/fcntl.h>	/* O_ACCMODE */
 #include <linux/aio.h>
 #include <asm/uaccess.h>
+#include <linux/seq_file.h>
 #include "sculld.h"		/* local definitions */
 
 
@@ -66,59 +67,31 @@ static struct ldd_driver sculld_driver = {
  * The proc filesystem: function to read and entry
  */
 
-void sculld_proc_offset(char *buf, char **start, off_t *offset, int *len)
-{
-	if (*offset == 0)
-		return;
-	if (*offset >= *len) {
-		/* Not there yet */
-		*offset -= *len;
-		*len = 0;
-	} else {
-		/* We're into the interesting stuff now */
-		*start = buf + *offset;
-		*offset = 0;
-	}
-}
-
 /* FIXME: Do we need this here??  It be ugly  */
-int sculld_read_procmem(char *buf, char **start, off_t offset,
-                   int count, int *eof, void *data)
+static int sculld_read_procmem(struct seq_file *s, void *v)
 {
-	int i, j, order, qset, len = 0;
-	int limit = count - 80; /* Don't print more than this */
+	int i, j, order, qset;
 	struct sculld_dev *d;
 
-	*start = buf;
 	for(i = 0; i < sculld_devs; i++) {
 		d = &sculld_devices[i];
 		if (down_interruptible (&d->sem))
 			return -ERESTARTSYS;
 		qset = d->qset;  /* retrieve the features of each device */
 		order = d->order;
-		len += sprintf(buf+len,"\nDevice %i: qset %i, order %i, sz %li\n",
+		seq_printf(s,"\nDevice %i: qset %i, order %i, sz %li\n",
 				i, qset, order, (long)(d->size));
 		for (; d; d = d->next) { /* scan the list */
-			len += sprintf(buf+len,"  item at %p, qset at %p\n",d,d->data);
-			sculld_proc_offset (buf, start, &offset, &len);
-			if (len > limit)
-				goto out;
+			seq_printf(s,"  item at %p, qset at %p\n",d,d->data);
 			if (d->data && !d->next) /* dump only the last item - save space */
 				for (j = 0; j < qset; j++) {
 					if (d->data[j])
-						len += sprintf(buf+len,"    % 4i:%8p\n",j,d->data[j]);
-					sculld_proc_offset (buf, start, &offset, &len);
-					if (len > limit)
-						goto out;
+						seq_printf(s,"    % 4i:%8p\n",j,d->data[j]);
 				}
 		}
-	  out:
 		up (&sculld_devices[i].sem);
-		if (len > limit)
-			break;
 	}
-	*eof = 1;
-	return len;
+	return 0;
 }
 
 #endif /* SCULLD_USE_PROC */
@@ -408,31 +381,43 @@ loff_t sculld_llseek (struct file *filp, loff_t off, int whence)
 struct async_work {
 	struct kiocb *iocb;
 	int result;
-	struct work_struct work;
+	struct delayed_work work;
 };
 
 /*
  * "Complete" an asynchronous operation.
  */
-static void sculld_do_deferred_op(void *p)
+static void sculld_do_deferred_op(struct work_struct *work)
 {
-	struct async_work *stuff = (struct async_work *) p;
+	struct async_work *stuff = container_of(work, struct async_work,
+						work.work);
 	aio_complete(stuff->iocb, stuff->result, 0);
 	kfree(stuff);
 }
 
 
-static int sculld_defer_op(int write, struct kiocb *iocb, char __user *buf,
-		size_t count, loff_t pos)
+static int sculld_defer_op(int write, struct kiocb *iocb,
+			   const struct iovec *iov, unsigned long nr_segs,
+			   loff_t pos)
 {
 	struct async_work *stuff;
 	int result;
+	ssize_t len;
+	unsigned long seg;
 
 	/* Copy now while we can access the buffer */
-	if (write)
-		result = sculld_write(iocb->ki_filp, buf, count, &pos);
-	else
-		result = sculld_read(iocb->ki_filp, buf, count, &pos);
+	for (seg = len = result = 0; seg < nr_segs; seg++) {
+		if (write)
+			result = sculld_write(iocb->ki_filp, iov[seg].iov_base,
+					      iov[seg].iov_len, &pos);
+		else
+			result = sculld_read(iocb->ki_filp, iov[seg].iov_base,
+					     iov[seg].iov_len, &pos);
+		if (len < 0)
+			return len;
+
+		result += len;
+	}
 
 	/* If this is a synchronous IOCB, we return our status now. */
 	if (is_sync_kiocb(iocb))
@@ -444,26 +429,26 @@ static int sculld_defer_op(int write, struct kiocb *iocb, char __user *buf,
 		return result; /* No memory, just complete now */
 	stuff->iocb = iocb;
 	stuff->result = result;
-	INIT_WORK(&stuff->work, sculld_do_deferred_op, stuff);
+	INIT_DELAYED_WORK(&stuff->work, sculld_do_deferred_op);
 	schedule_delayed_work(&stuff->work, HZ/100);
 	return -EIOCBQUEUED;
 }
 
 
-static ssize_t sculld_aio_read(struct kiocb *iocb, char __user *buf, size_t count,
-		loff_t pos)
+static ssize_t sculld_aio_read(struct kiocb *iocb, const struct iovec *iov,
+			       unsigned long nr_segs, loff_t pos)
 {
-	return sculld_defer_op(0, iocb, buf, count, pos);
+	return sculld_defer_op(0, iocb, iov, nr_segs, pos);
 }
 
-static ssize_t sculld_aio_write(struct kiocb *iocb, const char __user *buf,
-		size_t count, loff_t pos)
+static ssize_t sculld_aio_write(struct kiocb *iocb, const struct iovec *iov,
+				unsigned long nr_segs, loff_t pos)
 {
-	return sculld_defer_op(1, iocb, (char __user *) buf, count, pos);
+	return sculld_defer_op(1, iocb, iov, nr_segs, pos);
 }
 
 
- 
+
 /*
  * Mmap *is* available, but confined in a different file
  */
@@ -521,7 +506,7 @@ int sculld_trim(struct sculld_dev *dev)
 static void sculld_setup_cdev(struct sculld_dev *dev, int index)
 {
 	int err, devno = MKDEV(sculld_major, index);
-    
+
 	cdev_init(&dev->cdev, &sculld_fops);
 	dev->cdev.owner = THIS_MODULE;
 	dev->cdev.ops = &sculld_fops;
@@ -531,9 +516,10 @@ static void sculld_setup_cdev(struct sculld_dev *dev, int index)
 		printk(KERN_NOTICE "Error %d adding scull%d", err, index);
 }
 
-static ssize_t sculld_show_dev(struct device *ddev, char *buf)
+static ssize_t sculld_show_dev(struct device *ddev, struct device_attribute *attr,
+			       char *buf)
 {
-	struct sculld_dev *dev = ddev->driver_data;
+	struct sculld_dev *dev = dev_get_drvdata(ddev);
 
 	return print_dev_t(buf, dev->cdev.dev);
 }
@@ -550,6 +536,18 @@ static void sculld_register_dev(struct sculld_dev *dev, int index)
 	device_create_file(&dev->ldev.dev, &dev_attr_dev);
 }
 
+static int sculld_procmem_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, sculld_read_procmem, NULL);
+}
+
+static struct file_operations sculld_procmem_ops = {
+	.owner   = THIS_MODULE,
+	.open    = sculld_procmem_open,
+	.read    = seq_read,
+	.llseek  = seq_lseek,
+	.release = single_release
+};
 
 /*
  * Finally, the module stuff
@@ -559,7 +557,7 @@ int sculld_init(void)
 {
 	int result, i;
 	dev_t dev = MKDEV(sculld_major, 0);
-	
+
 	/*
 	 * Register your major, and accept a dynamic number.
 	 */
@@ -576,8 +574,8 @@ int sculld_init(void)
 	 * Register with the driver core.
 	 */
 	register_ldd_driver(&sculld_driver);
-	
-	/* 
+
+	/*
 	 * allocate the devices -- we can't have them static, as the number
 	 * can be specified at load time
 	 */
@@ -597,7 +595,7 @@ int sculld_init(void)
 
 
 #ifdef SCULLD_USE_PROC /* only when available */
-	proc_create_data("sculldmem", 0, NULL, sculld_read_procmem, NULL);
+	proc_create("sculldmem", 0, NULL, &sculld_procmem_ops);
 #endif
 	return 0; /* succeed */
 

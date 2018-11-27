@@ -1,5 +1,5 @@
 # Comment/uncomment the following line to disable/enable debugging
-#DEBUG = y
+DEBUG = y
 
 # Add your debugging flag (or not) to CFLAGS
 ifeq ($(DEBUG),y)
@@ -7,33 +7,22 @@ ifeq ($(DEBUG),y)
 else
   DEBFLAGS = -O2
 endif
-CFLAGS  += $(DEBFLAGS) -I$(LDDINCDIR)
-
 
 ifneq ($(KERNELRELEASE),)
-# call from kernel build system
-
+# Kernel modules
 obj-m	:= lddbus.o
+
+# Specify flags for the module compilation.
+EXTRA_CFLAGS += -Wall -Werror $(DEBFLAGS) -I${PWD}/../include
 
 else
 
-KERNELDIR ?= /lib/modules/$(shell uname -r)/build
-PWD       := $(shell pwd)
+CROSS_PROGS :=
+HOST_PROGS :=
+SCRIPT_FILES :=
+CFLAGS +=
+LDFLAGS +=
 
-default:
-	$(MAKE) -C $(KERNELDIR) SUBDIRS=$(PWD) LDDINCDIR=$(PWD)/../include modules
+include ../kernel_env.mk
 
-endif
-
-
-
-clean:
-	rm -rf *.o *.ko *~ core .depend *.mod.c .*.cmd .tmp_versions .*.o.d
-
-depend .depend dep:
-	$(CC) $(CFLAGS) -M *.c > .depend
-
-
-ifeq (.depend,$(wildcard .depend))
-include .depend
 endif

@@ -19,6 +19,7 @@
 
 #include <linux/mm.h>		/* everything */
 #include <linux/errno.h>	/* error codes */
+#include <linux/fs.h>
 #include <asm/pgtable.h>
 
 #include "sculld.h"		/* local definitions */
@@ -56,16 +57,18 @@ void sculld_vma_close(struct vm_area_struct *vma)
  * is individually decreased, and would drop to 0.
  */
 
-struct page *sculld_vma_nopage(struct vm_area_struct *vma,
-                                unsigned long address, int *type)
+static int sculld_vma_fault(struct vm_area_struct *vma,
+                                struct vm_fault *vmf)
 {
 	unsigned long offset;
 	struct sculld_dev *ptr, *dev = vma->vm_private_data;
-	struct page *page = NOPAGE_SIGBUS;
+	struct page *page = NULL;
 	void *pageptr = NULL; /* default to "missing" */
+	int retval = VM_FAULT_NOPAGE;
 
 	down(&dev->sem);
-	offset = (address - vma->vm_start) + (vma->vm_pgoff << PAGE_SHIFT);
+	offset = (unsigned long)(vmf->virtual_address - vma->vm_start) +
+		(vma->vm_pgoff << PAGE_SHIFT);
 	if (offset >= dev->size) goto out; /* out of range */
 
 	/*
@@ -80,14 +83,16 @@ struct page *sculld_vma_nopage(struct vm_area_struct *vma,
 	}
 	if (ptr && ptr->data) pageptr = ptr->data[offset];
 	if (!pageptr) goto out; /* hole or end-of-file */
+	page = virt_to_page(pageptr);
 
 	/* got it, now increment the count */
 	get_page(page);
-	if (type)
-		*type = VM_FAULT_MINOR;
+	vmf->page = page;
+	retval = 0;
+
   out:
 	up(&dev->sem);
-	return page;
+	return retval;
 }
 
 
@@ -95,13 +100,13 @@ struct page *sculld_vma_nopage(struct vm_area_struct *vma,
 struct vm_operations_struct sculld_vm_ops = {
 	.open =     sculld_vma_open,
 	.close =    sculld_vma_close,
-	.nopage =   sculld_vma_nopage,
+	.fault =   sculld_vma_fault,
 };
 
 
 int sculld_mmap(struct file *filp, struct vm_area_struct *vma)
 {
-	struct inode *inode = filp->f_dentry->d_inode;
+	struct inode *inode = file_inode(filp);
 
 	/* refuse to map if order is not 0 */
 	if (sculld_devices[iminor(inode)].order)
@@ -109,7 +114,6 @@ int sculld_mmap(struct file *filp, struct vm_area_struct *vma)
 
 	/* don't do anything here: "nopage" will set up page table entries */
 	vma->vm_ops = &sculld_vm_ops;
-	vma->vm_flags |= VM_RESERVED;
 	vma->vm_private_data = filp->private_data;
 	sculld_vma_open(vma);
 	return 0;

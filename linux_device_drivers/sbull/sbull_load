@@ -1,8 +1,8 @@
 #!/bin/sh
 
-function make_minors {
+make_minors() {
     let part=1
-    while (($part < $minors)); do
+    for part in $(seq $minors); do
 	let minor=$part+$2
 	mknod $1$part b $major $minor
 	let part=$part+1

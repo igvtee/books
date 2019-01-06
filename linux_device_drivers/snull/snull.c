@@ -86,6 +86,8 @@ struct snull_priv {
 	u8 *tx_packetdata;
 	struct sk_buff *skb;
 	spinlock_t lock;
+	struct net_device *dev;
+	struct napi_struct napi;
 };
 
 static void snull_tx_timeout(struct net_device *dev);
@@ -283,14 +285,15 @@ void snull_rx(struct net_device *dev, struct snull_packet *pkt)
 /*
  * The poll implementation.
  */
-static int snull_poll(struct net_device *dev, int *budget)
+static int snull_poll(struct napi_struct *napi, int budget)
 {
-	int npackets = 0, quota = min(dev->quota, *budget);
+	int npackets = 0;
 	struct sk_buff *skb;
-	struct snull_priv *priv = netdev_priv(dev);
+	struct snull_priv *priv = container_of(napi, struct snull_priv, napi);
+	struct net_device *dev = priv->dev;
 	struct snull_packet *pkt;
-    
-	while (npackets < quota && priv->rx_queue) {
+
+	while (npackets < budget && priv->rx_queue) {
 		pkt = snull_dequeue_buf(dev);
 		skb = dev_alloc_skb(pkt->datalen + 2);
 		if (! skb) {
@@ -306,26 +309,23 @@ static int snull_poll(struct net_device *dev, int *budget)
 		skb->protocol = eth_type_trans(skb, dev);
 		skb->ip_summed = CHECKSUM_UNNECESSARY; /* don't check it */
 		netif_receive_skb(skb);
-		
-        	/* Maintain stats */
+
+		/* Maintain stats */
 		npackets++;
 		priv->stats.rx_packets++;
 		priv->stats.rx_bytes += pkt->datalen;
 		snull_release_buffer(pkt);
 	}
 	/* If we processed all packets, we're done; tell the kernel and reenable ints */
-	*budget -= npackets;
-	dev->quota -= npackets;
 	if (! priv->rx_queue) {
-		netif_rx_complete(dev);
+		napi_complete(napi);
 		snull_rx_ints(dev, 1);
 		return 0;
 	}
 	/* We couldn't process everything. */
-	return 1;
+	return npackets;
 }
-	    
-        
+
 /*
  * The typical interrupt entry point
  */
@@ -402,10 +402,10 @@ static void snull_napi_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 	priv->status = 0;
 	if (statusword & SNULL_RX_INTR) {
 		snull_rx_ints(dev, 0);  /* Disable further interrupts */
-		netif_rx_schedule(dev);
+		napi_schedule(&priv->napi);
 	}
 	if (statusword & SNULL_TX_INTR) {
-        	/* a transmission is over: free the skb */
+		/* a transmission is over: free the skb */
 		priv->stats.tx_packets++;
 		priv->stats.tx_bytes += priv->tx_packetlen;
 		dev_kfree_skb(priv->skb);
@@ -493,7 +493,7 @@ static void snull_hw_tx(char *buf, int len, struct net_device *dev)
 	priv->tx_packetdata = buf;
 	priv->status |= SNULL_TX_INTR;
 	if (lockup && ((priv->stats.tx_packets + 1) % lockup) == 0) {
-        	/* Simulate a dropped transmit interrupt */
+		/* Simulate a dropped transmit interrupt */
 		netif_stop_queue(dev);
 		PDEBUG("Simulate lockup at %ld, txp %ld\n", jiffies,
 				(unsigned long) priv->stats.tx_packets);
@@ -575,16 +575,15 @@ int snull_rebuild_header(struct sk_buff *skb)
 {
 	struct ethhdr *eth = (struct ethhdr *) skb->data;
 	struct net_device *dev = skb->dev;
-    
+
 	memcpy(eth->h_source, dev->dev_addr, dev->addr_len);
 	memcpy(eth->h_dest, dev->dev_addr, dev->addr_len);
 	eth->h_dest[ETH_ALEN-1]   ^= 0x01;   /* dest is us xor 1 */
 	return 0;
 }
 
-
 int snull_header(struct sk_buff *skb, struct net_device *dev,
-                unsigned short type, void *daddr, void *saddr,
+                unsigned short type, const void *daddr, const void *saddr,
                 unsigned int len)
 {
 	struct ethhdr *eth = (struct ethhdr *)skb_push(skb,ETH_HLEN);
@@ -596,10 +595,6 @@ int snull_header(struct sk_buff *skb, struct net_device *dev,
 	return (dev->hard_header_len);
 }
 
-
-
-
-
 /*
  * The "change_mtu" method is usually not needed.
  * If you need it, it must be like this.
@@ -609,7 +604,7 @@ int snull_change_mtu(struct net_device *dev, int new_mtu)
 	unsigned long flags;
 	struct snull_priv *priv = netdev_priv(dev);
 	spinlock_t *lock = &priv->lock;
-    
+
 	/* check ranges */
 	if ((new_mtu < 68) || (new_mtu > 1500))
 		return -EINVAL;
@@ -622,6 +617,22 @@ int snull_change_mtu(struct net_device *dev, int new_mtu)
 	return 0; /* success */
 }
 
+static const struct header_ops snull_header_ops = {
+	.create  = snull_header,
+	.rebuild = snull_rebuild_header
+};
+
+static const struct net_device_ops snull_netdev_ops = {
+	.ndo_open            = snull_open,
+	.ndo_stop            = snull_release,
+	.ndo_start_xmit      = snull_tx,
+	.ndo_do_ioctl        = snull_ioctl,
+	.ndo_set_config      = snull_config,
+	.ndo_get_stats       = snull_stats,
+	.ndo_change_mtu      = snull_change_mtu,
+	.ndo_tx_timeout      = snull_tx_timeout
+};
+
 /*
  * The init function (sometimes called probe).
  * It is invoked by register_netdev()
@@ -633,42 +644,31 @@ void snull_init(struct net_device *dev)
     	/*
 	 * Make the usual checks: check_region(), probe irq, ...  -ENODEV
 	 * should be returned if no device found.  No resource should be
-	 * grabbed: this is done on open(). 
+	 * grabbed: this is done on open().
 	 */
 #endif
 
-    	/* 
+	/*
 	 * Then, assign other fields in dev, using ether_setup() and some
 	 * hand assignments
 	 */
 	ether_setup(dev); /* assign some of the fields */
-
-	dev->open            = snull_open;
-	dev->stop            = snull_release;
-	dev->set_config      = snull_config;
-	dev->hard_start_xmit = snull_tx;
-	dev->do_ioctl        = snull_ioctl;
-	dev->get_stats       = snull_stats;
-	dev->change_mtu      = snull_change_mtu;  
-	dev->rebuild_header  = snull_rebuild_header;
-	dev->hard_header     = snull_header;
-	dev->tx_timeout      = snull_tx_timeout;
 	dev->watchdog_timeo = timeout;
-	if (use_napi) {
-		dev->poll        = snull_poll;
-		dev->weight      = 2;
-	}
+	dev->netdev_ops = &snull_netdev_ops;
+	dev->header_ops = &snull_header_ops;
 	/* keep the default flags, just add NOARP */
 	dev->flags           |= IFF_NOARP;
-	dev->features        |= NETIF_F_NO_CSUM;
-	dev->hard_header_cache = NULL;      /* Disable caching */
+	dev->features        |= NETIF_F_HW_CSUM;
 
 	/*
 	 * Then, initialize the priv field. This encloses the statistics
 	 * and a few private fields.
 	 */
 	priv = netdev_priv(dev);
+	if (use_napi)
+		netif_napi_add(dev, &priv->napi, snull_poll, 2);
 	memset(priv, 0, sizeof(struct snull_priv));
+	priv->dev = dev;
 	spin_lock_init(&priv->lock);
 	snull_rx_ints(dev, 1);		/* enable receive interrupts */
 	snull_setup_pool(dev);
@@ -711,9 +711,9 @@ int snull_init_module(void)
 
 	/* Allocate the devices */
 	snull_devs[0] = alloc_netdev(sizeof(struct snull_priv), "sn%d",
-			snull_init);
+			NET_NAME_UNKNOWN, snull_init);
 	snull_devs[1] = alloc_netdev(sizeof(struct snull_priv), "sn%d",
-			snull_init);
+			NET_NAME_UNKNOWN, snull_init);
 	if (snull_devs[0] == NULL || snull_devs[1] == NULL)
 		goto out;
 

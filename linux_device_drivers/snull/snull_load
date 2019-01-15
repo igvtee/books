@@ -2,14 +2,7 @@
 
 export PATH=/sbin:/bin
 
-cat << EOF >> /etc/hosts
-192.168.0.1 local0
-192.168.0.2 remote0
-192.168.1.2 local1
-192.168.1.1 remote1
-EOF
-
 # Use a pathname, as new modutils don't look in the current dir by default
-insmod ./snull.ko $*
-ifconfig sn0 local0
-ifconfig sn1 local1
+modprobe snull $*
+ifconfig sn0 192.168.0.1
+ifconfig sn1 192.168.1.2

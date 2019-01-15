@@ -195,16 +195,16 @@ static void snull_rx_ints(struct net_device *dev, int enable)
 	priv->rx_int_enabled = enable;
 }
 
-    
 /*
  * Open and close
  */
 
 int snull_open(struct net_device *dev)
 {
+	struct snull_priv *priv = netdev_priv(dev);
 	/* request_region(), request_irq(), ....  (like fops->open) */
 
-	/* 
+	/*
 	 * Assign the hardware address of the board: use "\0SNULx", where
 	 * x is 0 or 1. The first byte is '\0' to avoid being a multicast
 	 * address (the first byte of multicast addrs is odd).
@@ -213,11 +213,16 @@ int snull_open(struct net_device *dev)
 	if (dev == snull_devs[1])
 		dev->dev_addr[ETH_ALEN-1]++; /* \0SNUL1 */
 	netif_start_queue(dev);
+
+	napi_enable(&priv->napi);
 	return 0;
 }
 
 int snull_release(struct net_device *dev)
 {
+	struct snull_priv *priv = netdev_priv(dev);
+
+	napi_disable(&priv->napi);
     /* release ports, irq and such -- like fops->close */
 
 	netif_stop_queue(dev); /* can't transmit any more */
@@ -241,7 +246,7 @@ int snull_config(struct net_device *dev, struct ifmap *map)
 	/* Allow changing the IRQ */
 	if (map->irq != dev->irq) {
 		dev->irq = map->irq;
-        	/* request_irq() is delayed to open-time */
+		/* request_irq() is delayed to open-time */
 	}
 
 	/* ignore other fields */
@@ -280,7 +285,6 @@ void snull_rx(struct net_device *dev, struct snull_packet *pkt)
   out:
 	return;
 }
-    
 
 /*
  * The poll implementation.
@@ -363,9 +367,12 @@ static void snull_regular_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 	}
 	if (statusword & SNULL_TX_INTR) {
 		/* a transmission is over: free the skb */
-		priv->stats.tx_packets++;
-		priv->stats.tx_bytes += priv->tx_packetlen;
-		dev_kfree_skb(priv->skb);
+		if (priv->skb) {
+			priv->stats.tx_packets++;
+			priv->stats.tx_bytes += priv->tx_packetlen;
+			dev_kfree_skb(priv->skb);
+			priv->skb = NULL;
+		}
 	}
 
 	/* Unlock the device and we are done */
@@ -406,9 +413,12 @@ static void snull_napi_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 	}
 	if (statusword & SNULL_TX_INTR) {
 		/* a transmission is over: free the skb */
-		priv->stats.tx_packets++;
-		priv->stats.tx_bytes += priv->tx_packetlen;
-		dev_kfree_skb(priv->skb);
+		if (priv->skb) {
+			priv->stats.tx_packets++;
+			priv->stats.tx_bytes += priv->tx_packetlen;
+			dev_kfree_skb(priv->skb);
+			priv->skb = NULL;
+		}
 	}
 
 	/* Unlock the device and we are done */
@@ -491,26 +501,26 @@ static void snull_hw_tx(char *buf, int len, struct net_device *dev)
 	priv = netdev_priv(dev);
 	priv->tx_packetlen = len;
 	priv->tx_packetdata = buf;
-	priv->status |= SNULL_TX_INTR;
 	if (lockup && ((priv->stats.tx_packets + 1) % lockup) == 0) {
 		/* Simulate a dropped transmit interrupt */
 		netif_stop_queue(dev);
-		PDEBUG("Simulate lockup at %ld, txp %ld\n", jiffies,
+		PDEBUG("Simulate lockup at %lu, txp %lu\n", jiffies,
 				(unsigned long) priv->stats.tx_packets);
-	}
-	else
+	} else {
+		priv->status |= SNULL_TX_INTR;
 		snull_interrupt(0, dev, NULL);
+	}
 }
 
 /*
  * Transmit a packet (called by the kernel)
  */
-int snull_tx(struct sk_buff *skb, struct net_device *dev)
+netdev_tx_t snull_tx(struct sk_buff *skb, struct net_device *dev)
 {
 	int len;
 	char *data, shortpkt[ETH_ZLEN];
 	struct snull_priv *priv = netdev_priv(dev);
-	
+
 	data = skb->data;
 	len = skb->len;
 	if (len < ETH_ZLEN) {
@@ -527,7 +537,7 @@ int snull_tx(struct sk_buff *skb, struct net_device *dev)
 	/* actual deliver of data is device-specific, and not shown here */
 	snull_hw_tx(data, len, dev);
 
-	return 0; /* Our simple device can not fail */
+	return NETDEV_TX_OK; /* Our simple device can not fail */
 }
 
 /*
@@ -537,7 +547,7 @@ void snull_tx_timeout (struct net_device *dev)
 {
 	struct snull_priv *priv = netdev_priv(dev);
 
-	PDEBUG("Transmit timeout at %ld, latency %ld\n", jiffies,
+	PDEBUG("Transmit timeout at %lu, latency %lu\n", jiffies,
 			jiffies - dev->trans_start);
         /* Simulate a transmission interrupt to get things moving */
 	priv->status = SNULL_TX_INTR;
@@ -550,7 +560,7 @@ void snull_tx_timeout (struct net_device *dev)
 
 
 /*
- * Ioctl commands 
+ * Ioctl commands
  */
 int snull_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 {
@@ -665,8 +675,6 @@ void snull_init(struct net_device *dev)
 	 * and a few private fields.
 	 */
 	priv = netdev_priv(dev);
-	if (use_napi)
-		netif_napi_add(dev, &priv->napi, snull_poll, 2);
 	memset(priv, 0, sizeof(struct snull_priv));
 	priv->dev = dev;
 	spin_lock_init(&priv->lock);
@@ -689,7 +697,7 @@ struct net_device *snull_devs[2];
 void snull_cleanup(void)
 {
 	int i;
-    
+
 	for (i = 0; i < 2;  i++) {
 		if (snull_devs[i]) {
 			unregister_netdev(snull_devs[i]);
@@ -706,6 +714,7 @@ void snull_cleanup(void)
 int snull_init_module(void)
 {
 	int result, i, ret = -ENOMEM;
+	struct snull_priv *priv;
 
 	snull_interrupt = use_napi ? snull_napi_interrupt : snull_regular_interrupt;
 
@@ -718,14 +727,19 @@ int snull_init_module(void)
 		goto out;
 
 	ret = -ENODEV;
-	for (i = 0; i < 2;  i++)
+	for (i = 0; i < 2;  i++) {
+		if (use_napi) {
+			priv = netdev_priv(snull_devs[i]);
+			netif_napi_add(snull_devs[i], &priv->napi, snull_poll, 2);
+		}
 		if ((result = register_netdev(snull_devs[i])))
 			printk("snull: error %i registering device \"%s\"\n",
 					result, snull_devs[i]->name);
 		else
 			ret = 0;
+	}
    out:
-	if (ret) 
+	if (ret)
 		snull_cleanup();
 	return ret;
 }

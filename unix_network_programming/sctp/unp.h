@@ -347,7 +347,7 @@ struct if_nameindex *if_nameindex(void);
 
 #ifndef	HAVE_INET_PTON_PROTO
 int			 inet_pton(int, const char *, void *);
-const char	*inet_ntop(int, const void *, char *, size_t);
+const char	*inet_ntop(int, const void *, char *, socklen_t);
 #endif
 
 #ifndef	HAVE_INET_ATON_PROTO

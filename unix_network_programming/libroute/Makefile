@@ -1,4 +1,5 @@
 include ../Make.defines
+CFLAGS += -fPIC
 
 all:	${LIBROUTE_OBJS}
 		ar rv ${LIBUNP_NAME} $?

@@ -1,4 +1,5 @@
 include ../Make.defines
+CFLAGS += -fPIC
 
 # Note: In the source code in this directory I #ifdef the constants
 # IPv4, IPv6 (both lowercase "v"), and UNIXdomain.  This is instead of

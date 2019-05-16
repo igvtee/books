@@ -1,9 +1,10 @@
 include ../Make.defines
 
 PROGS =	tcpcli01 tcpcli04 tcpcli05 tcpcli06 \
-		tcpcli07 tcpcli08 tcpcli09 tcpcli10 \
+		tcpcli07 tcpcli08 tcpcli09 tcpcli10 tcpcli11 \
 		tcpserv01 tcpserv02 tcpserv03 tcpserv04 \
-		tcpserv08 tcpserv09 tcpservselect01 tcpservpoll01 tsigpipe
+		tcpserv08 tcpserv09 tcpservselect01 tcpservpoll01 tsigpipe \
+		tcpservselect02 tcpservpoll02
 
 all:	${PROGS}
 
@@ -57,8 +58,14 @@ tcpserv09:	tcpserv09.o str_echo09.o sigchldwaitpid.o
 tcpservselect01:	tcpservselect01.o
 		${CC} ${CFLAGS} -o $@ tcpservselect01.o ${LIBS}
 
+tcpservselect02:	tcpservselect02.o
+		${CC} ${CFLAGS} -o $@ tcpservselect02.o ${LIBS}
+
 tcpservpoll01:	tcpservpoll01.o
 		${CC} ${CFLAGS} -o $@ tcpservpoll01.o ${LIBS}
+
+tcpservpoll02:	tcpservpoll02.o
+		${CC} ${CFLAGS} -o $@ tcpservpoll02.o ${LIBS}
 
 tsigpipe:	tsigpipe.o
 		${CC} ${CFLAGS} -o $@ tsigpipe.o ${LIBS}

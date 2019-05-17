@@ -11,10 +11,15 @@
 #include	<fcntl.h>
 #include	<sys/ioctl.h>
 
+#ifdef	FIOASYNC
+static void sigio_func(int);
+#endif
+
 void
 sockopts(int sockfd, int doall)
 {
-    int 			option, optlen;
+    int 			option;
+	socklen_t optlen;
 	struct linger	ling;
 	struct timeval	timer;
 
@@ -328,8 +333,6 @@ sockopts(int sockfd, int doall)
 
     if (sigio) {
 #ifdef	FIOASYNC
-		static void sigio_func(int);
-
 		/*
 		 * Should be able to set this with fcntl(O_ASYNC) or fcntl(FASYNC),
 		 * but some systems (AIX?) only do it with ioctl().

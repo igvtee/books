@@ -16,7 +16,8 @@ void
 loop_udp(int sockfd)
 {
 	int						maxfdp1, nread, ntowrite, stdineof,
-							clilen, servlen, flags;
+							clilen, flags;
+	socklen_t servlen;
 	fd_set					rset;
 	struct sockaddr_in		cliaddr;		/* for UDP server */
 	struct sockaddr_in		servaddr;		/* for UDP client */

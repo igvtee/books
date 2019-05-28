@@ -1,12 +1,14 @@
 #include	"unp.h"
 
-static doit(int, const char *);
+static void doit(int, const char *);
 
-void
+int
 main()
 {
 	int		tcpsock, udpsock;
+#ifdef notdef
 	struct sockaddr_in	servaddr;
+#endif
 
 	if ( (tcpsock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		err_sys("TCP socket error");
@@ -31,7 +33,7 @@ main()
 	exit(0);
 }
 
-static
+static void
 doit(int fd, const char *name)
 {
 	int			val;

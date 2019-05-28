@@ -2,7 +2,7 @@ include ../Make.defines
 
 PROGS =	udpcli01 udpserv01 udpcli02 udpcli03 udpcli04 \
 		udpcli06 udpserv06 udpserv07 udpcli08 udpcli09 udpcli10 \
-		udpservselect01
+		udpservselect01 udpserv10
 
 all:	${PROGS}
 
@@ -38,6 +38,9 @@ udpcli08:	udpcli08.o dgcliloop3.o
 
 udpcli09:	udpcli09.o
 		${CC} ${CFLAGS} -o $@ udpcli09.o ${LIBS}
+
+udpserv10:	udpserv01.o dgechobig.o
+		${CC} ${CFLAGS} -o $@ udpserv01.o dgechobig.o ${LIBS}
 
 udpcli10:	udpcli10.o dgclibig.o
 		${CC} ${CFLAGS} -o $@ udpcli10.o dgclibig.o ${LIBS}

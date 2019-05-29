@@ -1,6 +1,8 @@
 #include	"unp.h"
 #include	<time.h>
 
+int Udp_server_reuseaddr(const char *host, const char *serv, socklen_t *addrlenp);
+
 int
 main(int argc, char **argv)
 {
@@ -10,6 +12,8 @@ main(int argc, char **argv)
 	time_t			ticks;
 	socklen_t		len;
 	struct sockaddr_storage	cliaddr;
+
+	sockfd = -1;
 
 	if (argc == 2)
 		sockfd = Udp_server_reuseaddr(NULL, argv[1], NULL);
@@ -21,7 +25,8 @@ main(int argc, char **argv)
 	for ( ; ; ) {
 		len = sizeof(cliaddr);
 		n = Recvfrom(sockfd, buff, MAXLINE, 0, (SA *)&cliaddr, &len);
-		printf("datagram from %s\n", Sock_ntop((SA *)&cliaddr, len));
+		printf("datagram from %s, size %zd\n",
+		       Sock_ntop((SA *)&cliaddr, len), n);
 
 		ticks = time(NULL);
 		snprintf(buff, sizeof(buff), "%.24s\r\n", ctime(&ticks));

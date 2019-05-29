@@ -11,7 +11,7 @@ main(int argc, char **argv)
 	if (argc != 3)
 		err_quit("usage: test2 <hostname/IPaddress> <service/port#>");
 
-	sockfd = Udp_client(argv[1], argv[2], (void **) &sa, &salen);
+	sockfd = Udp_client(argv[1], argv[2], (SA **) &sa, &salen);
 
 	/* Same as daytimeudpcli1, but we explicitly bind the wildcard */
 	sabind = Malloc(salen);

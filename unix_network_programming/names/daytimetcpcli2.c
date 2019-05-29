@@ -13,6 +13,9 @@ main(int argc, char **argv)
 	if (argc != 3)
 		err_quit("usage: daytimetcpcli2 <hostname> <service>");
 
+	sockfd = -1;
+	pptr = NULL;
+
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 

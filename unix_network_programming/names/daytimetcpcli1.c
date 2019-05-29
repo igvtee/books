@@ -15,6 +15,9 @@ main(int argc, char **argv)
 	if (argc != 3)
 		err_quit("usage: daytimetcpcli1 <hostname> <service>");
 
+	sockfd = -1;
+	pptr = NULL;
+
 	if ( (hp = gethostbyname(argv[1])) == NULL) {
 		if (inet_aton(argv[1], &inetaddr) == 0) {
 			err_quit("hostname error for %s: %s", argv[1], hstrerror(h_errno));

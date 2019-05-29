@@ -10,6 +10,8 @@ main(int argc, char **argv)
 	char			buff[MAXLINE], host[NI_MAXHOST], serv[NI_MAXSERV];
 	time_t			ticks;
 
+	listenfd = -1;
+
 	if (argc == 2)
 		listenfd = Tcp_listen(NULL, argv[1], &addrlen);
 	else if (argc == 3)

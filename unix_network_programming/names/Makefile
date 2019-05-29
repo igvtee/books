@@ -5,7 +5,7 @@ PROGS =	daytimetcpcli daytimetcpcli1 daytimetcpsrv1 daytimetcpsrv2 \
 		daytimeudpcli1 daytimetcpcli2 daytimetcpcli3 \
 		daytimeudpcli2 daytimeudpsrv2 daytimeudpsrv3 \
 		hostent hostent2 hostent3 \
-		netent prmyaddrs prmyaddrs1 test1
+		netent prmyaddrs prmyaddrs1 test1 test2
 
 all:	${PROGS}
 

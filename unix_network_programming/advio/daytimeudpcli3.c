@@ -11,7 +11,7 @@ main(int argc, char **argv)
 	if (argc != 3)
 		err_quit("usage: a.out <hostname or IPaddress> <service or port#>");
 
-	sockfd = Udp_client(argv[1], argv[2], (void **) &sa, &salen);
+	sockfd = Udp_client(argv[1], argv[2], (SA **) &sa, &salen);
 
 	printf("sending to %s\n", Sock_ntop_host(sa, salen));
 

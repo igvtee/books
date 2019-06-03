@@ -7,7 +7,9 @@ void
 dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 {
 	int						flags;
+#if defined(IP_RECVDSTADDR) || defined(IP_RECVIF)
 	const int				on = 1;
+#endif
 	socklen_t				len;
 	ssize_t					n;
 	char					mesg[MAXLINE], str[INET6_ADDRSTRLEN],
@@ -30,13 +32,13 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 		flags = 0;
 		n = Recvfrom_flags(sockfd, mesg, MAXLINE, &flags,
 						   pcliaddr, &len, &pktinfo);
-		printf("%d-byte datagram from %s", n, Sock_ntop(pcliaddr, len));
+		printf("%zd-byte datagram from %s", n, Sock_ntop(pcliaddr, len));
 		if (memcmp(&pktinfo.ipi_addr, &in_zero, sizeof(in_zero)) != 0)
 			printf(", to %s", Inet_ntop(AF_INET, &pktinfo.ipi_addr,
 										str, sizeof(str)));
 		if (pktinfo.ipi_ifindex > 0)
 			printf(", recv i/f = %s",
-				   If_indextoname(pktinfo.ipi_ifindex, ifname));
+				   if_indextoname(pktinfo.ipi_ifindex, ifname));
 #ifdef	MSG_TRUNC
 		if (flags & MSG_TRUNC)	printf(" (datagram truncated)");
 #endif

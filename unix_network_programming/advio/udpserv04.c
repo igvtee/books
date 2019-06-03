@@ -5,24 +5,24 @@ void	mydg_echo(int, SA *, socklen_t);
 int
 main(int argc, char **argv)
 {
-	int					sockfd, family, port;
+	int					sockfd = -1, family, port;
 	const int			on = 1;
 	pid_t				pid;
 	socklen_t			salen;
 	struct sockaddr		*sa, *wild;
-	struct ifi_info		*ifi, *ifihead;
+	struct ifi_info		*ifi;
 
 	if (argc == 2)
-		sockfd = Udp_client(NULL, argv[1], (void **) &sa, &salen);
+		sockfd = Udp_client(NULL, argv[1], (SA **) &sa, &salen);
 	else if (argc == 3)
-		sockfd = Udp_client(argv[1], argv[2], (void **) &sa, &salen);
+		sockfd = Udp_client(argv[1], argv[2], (SA **) &sa, &salen);
 	else
 		err_quit("usage: udpserv04 [ <host> ] <service or port>");
 	family = sa->sa_family;
 	port = sock_get_port(sa, salen);
 	Close(sockfd);		/* we just want family, port, salen */
 
-	for (ifihead = ifi = Get_ifi_info(family, 1);
+	for (ifi = Get_ifi_info(family, 1);
 		 ifi != NULL; ifi = ifi->ifi_next) {
 
 			/*4bind unicast address */

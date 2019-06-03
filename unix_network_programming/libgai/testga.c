@@ -274,7 +274,7 @@ do_onetest(char *host, char *serv, struct addrinfo *hints, int iteration)
 			/* Call socket() to make sure return values are valid */
 		fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 		if (fd < 0)
-			printf("call to socket() failed!\n");
+			printf("call to socket() failed! %s\n", strerror(errno));
 		else
 			close(fd);
 

@@ -9,10 +9,10 @@ main(int argc, char **argv)
 	int					sockfd;
 	const int			on = 1;
 	pid_t				pid;
-	struct ifi_info		*ifi, *ifihead;
-	struct sockaddr_in	*sa, cliaddr, wildaddr;
+	struct ifi_info		*ifi;
+	struct sockaddr_in	*sa = NULL, cliaddr, wildaddr;
 
-	for (ifihead = ifi = Get_ifi_info(AF_INET, 1);
+	for (ifi = Get_ifi_info(AF_INET, 1);
 		 ifi != NULL; ifi = ifi->ifi_next) {
 
 			/*4bind unicast address */
@@ -72,7 +72,7 @@ main(int argc, char **argv)
 	Bind(sockfd, (SA *) &wildaddr, sizeof(wildaddr));
 	printf("bound %s\n", Sock_ntop((SA *) &wildaddr, sizeof(wildaddr)));
 
-	if ( (pid = Fork()) == 0) {		/* child */
+	if ( (pid = Fork()) == 0 && sa) {		/* child */
 		mydg_echo(sockfd, (SA *) &cliaddr, sizeof(cliaddr), (SA *) sa);
 		exit(0);		/* never executed */
 	}

@@ -1,4 +1,5 @@
 include ../Make.defines
+CFLAGS += -fPIC
 
 PROGS =	daytimetcpcli daytimetcpsrv2 mycat openfile \
 	unixbind unixstrcli01 unixstrserv01 unixstrserv02 \

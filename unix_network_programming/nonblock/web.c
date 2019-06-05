@@ -7,6 +7,7 @@ main(int argc, char **argv)
 	int		i, fd, n, maxnconn, flags, error;
 	char	buf[MAXLINE];
 	fd_set	rs, ws;
+	socklen_t sn;
 
 	if (argc < 5)
 		err_quit("usage: web <#conns> <hostname> <homepage> <file1> ...");
@@ -54,7 +55,7 @@ main(int argc, char **argv)
 			if (flags & F_CONNECTING &&
 				(FD_ISSET(fd, &rs) || FD_ISSET(fd, &ws))) {
 				n = sizeof(error);
-				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &n) < 0 ||
+				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &sn) < 0 ||
 					error != 0) {
 					err_ret("nonblocking connect failed for %s",
 							file[i].f_name);

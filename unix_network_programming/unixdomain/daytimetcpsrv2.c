@@ -4,7 +4,7 @@
 int
 main(int argc, char **argv)
 {
-	int				i, listenfd, connfd;
+	int				i, listenfd = -1, connfd;
 	socklen_t		addrlen, len;
 	struct sockaddr	*cliaddr;
 	char			buff[MAXLINE];

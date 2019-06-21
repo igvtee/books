@@ -11,14 +11,14 @@ main(int argc, char **argv)
 		err_quit("usage: prifnameindex");
 
 		/* print all the interface names and indexes */
-	for (save = ifptr = If_nameindex(); ifptr->if_index > 0; ifptr++) {
+	for (save = ifptr = if_nameindex(); ifptr->if_index > 0; ifptr++) {
 		printf("name = %s, index = %d\n", ifptr->if_name, ifptr->if_index);;
 
-		if ( (n = If_nametoindex(ifptr->if_name)) != ifptr->if_index)
+		if ( (n = if_nametoindex(ifptr->if_name)) != ifptr->if_index)
 			err_quit("if_nametoindex returned %d, expected %d, for %s",
 					 n, ifptr->if_index, ifptr->if_name);
 
-		If_indextoname(ifptr->if_index, ifname);
+		if_indextoname(ifptr->if_index, ifname);
 		if (strcmp(ifname, ifptr->if_name) != 0)
 			err_quit("if_indextoname returned %s, expected %s, for %d",
 					 ifname, ifptr->if_name, ifptr->if_index);

@@ -1,7 +1,7 @@
 include ../Make.defines
 
-PROGS =	checkudpsum getrt mynetstat \
-		prifinfo prifindex prifname prifnameindex
+PROGS =	checktcpmem getrt_nl \
+		prifindex prifname prifnameindex
 
 all:	${PROGS}
 
@@ -10,6 +10,9 @@ checkudpsum:	checkudpsum.o
 
 getrt:	getrt.o
 		${CC} ${CFLAGS} -o $@ getrt.o ${LIBS}
+
+getrt_nl:	getrt_nl.o
+		${CC} ${CFLAGS} -o $@ getrt_nl.o ${LIBS}
 
 prifinfo:	prifinfo.o get_ifi_info.o
 		${CC} ${CFLAGS} -o $@ prifinfo.o get_ifi_info.o ${LIBS}

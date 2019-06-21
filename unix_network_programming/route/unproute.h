@@ -1,8 +1,8 @@
 #include	"unp.h"
 #include	<net/if.h>			/* if_msghdr{} */
-#include	<net/if_dl.h>		/* sockaddr_sdl{} */
 #include	<net/route.h>		/* RTA_xxx constants */
 #include	<sys/param.h>
+#include	<linux/rtnetlink.h>
 
 #ifdef	HAVE_SYS_SYSCTL_H
 #include	<sys/sysctl.h>		/* sysctl() */

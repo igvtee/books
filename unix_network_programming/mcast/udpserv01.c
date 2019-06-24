@@ -19,7 +19,7 @@ main(int argc, char **argv)
 	grpaddr.sin_family      = AF_INET;
 	grpaddr.sin_addr.s_addr = inet_addr("224.0.0.1");
 
-	mcast_join(sockfd, &grpaddr, sizeof(grpaddr), NULL, 0);
+	mcast_join(sockfd, (SA *)&grpaddr, sizeof(grpaddr), NULL, 0);
 
 	dg_echo(sockfd, (SA *) &cliaddr, sizeof(cliaddr));
 }

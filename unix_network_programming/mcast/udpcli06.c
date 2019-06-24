@@ -10,7 +10,7 @@ main(int argc, char **argv)
 	if (argc != 2)
 		err_quit("usage: udpcli06 <IPaddress>");
 
-	sockfd = Udp_client(argv[1], "daytime", (void **) &serv, &salen);
+	sockfd = Udp_client(argv[1], "daytime", (SA **) &serv, &salen);
 
 	cli = Malloc(salen);
 	memcpy(cli, serv, salen);		/* copy socket address struct */

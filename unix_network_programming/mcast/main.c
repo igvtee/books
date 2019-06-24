@@ -14,7 +14,7 @@ main(int argc, char **argv)
 	if (argc != 3)
 		err_quit("usage: sendrecv <IP-multicast-address> <port#>");
 
-	sendfd = Udp_client(argv[1], argv[2], (void **) &sasend, &salen);
+	sendfd = Udp_client(argv[1], argv[2], (SA **) &sasend, &salen);
 
 	recvfd = Socket(sasend->sa_family, SOCK_DGRAM, 0);
 

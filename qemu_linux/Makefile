@@ -96,7 +96,7 @@ zImage.i386: ${LINUX_DIR}
 	$(if $(wildcard build/${ARCH}/linux/.config), \
 	  cd ${LINUX_DIR}; make O=${shell pwd}/build/${ARCH}/linux/ oldconfig , \
 	  cd ${LINUX_DIR}; make O=${shell pwd}/build/${ARCH}/linux/ defconfig)
-	cd build/${ARCH}/linux/; make all
+	cd build/${ARCH}/linux/; make CONFIG_DEBUG_INFO=y all
 	cd build/${ARCH}/linux/; INSTALL_MOD_PATH="../../../../rootfs" make modules_install
 	cp build/${ARCH}/linux/arch/${ARCH}/boot/bzImage $@
 

@@ -3,7 +3,7 @@ LINUX_PACKAGE=${LINUX_DIR}.tar.gz
 BUSYBOX_DIR=busybox-1.24.0
 BUSYBOX_PACKAGE=${BUSYBOX_DIR}.tar.bz2
 
-ARCH=arm
+ARCH=i386
 # environment
 ifeq (${ARCH},arm)
   CROSS_NAME=arm-linux-gnueabi
@@ -13,9 +13,9 @@ ifeq (${ARCH},arm64)
   CROSS_NAME=aarch64-linux-gnu
   LIBC_PATH=lib64
 endif
-ifeq (${ARCH},x86)
-  CROSS_NAME=
-  LIBC_PATH=lib64
+ifeq (${ARCH},i386)
+  CROSS_NAME=i686-pc-linux-gnu
+  LIBC_PATH=lib
 endif
 CROSS_COMPILE=${CROSS_NAME}-
 export ARCH CROSS_COMPILE
@@ -89,5 +89,15 @@ zImage.arm64: ${LINUX_DIR}
 	cd build/${ARCH}/linux/; make all
 	cd build/${ARCH}/linux/; INSTALL_MOD_PATH="../../../../rootfs" make modules_install
 	cp build/${ARCH}/linux/arch/${ARCH}/boot/Image.gz $@
+
+zImage.i386: ${LINUX_DIR}
+	mkdir -p build/${ARCH}/linux
+	cd ${LINUX_DIR}; make mrproper
+	$(if $(wildcard build/${ARCH}/linux/.config), \
+	  cd ${LINUX_DIR}; make O=${shell pwd}/build/${ARCH}/linux/ oldconfig , \
+	  cd ${LINUX_DIR}; make O=${shell pwd}/build/${ARCH}/linux/ defconfig)
+	cd build/${ARCH}/linux/; make CONFIG_DEBUG_INFO=y all
+	cd build/${ARCH}/linux/; INSTALL_MOD_PATH="../../../../rootfs" make modules_install
+	cp build/${ARCH}/linux/arch/${ARCH}/boot/bzImage $@
 
 linux: zImage.${ARCH}

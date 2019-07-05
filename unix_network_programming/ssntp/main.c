@@ -14,7 +14,7 @@ main(int argc, char **argv)
 	if (argc != 2)
 		err_quit("usage: ssntp <IPaddress>");
 
-	sockfd = Udp_client(argv[1], "ntp", (void **) &mcastsa, &salen);
+	sockfd = Udp_client(argv[1], "ntp", (SA **) &mcastsa, &salen);
 
 	wild = Malloc(salen);
 	memcpy(wild, mcastsa, salen);	/* copy family and port */

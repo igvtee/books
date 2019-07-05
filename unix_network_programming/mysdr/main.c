@@ -8,15 +8,15 @@ void	loop(int, socklen_t);
 int
 main(int argc, char **argv)
 {
-	int					sockfd;
+	int					sockfd = -1;
 	const int			on = 1;
 	socklen_t			salen;
 	struct sockaddr		*sa;
 
 	if (argc == 1)
-		sockfd = Udp_client(SAP_NAME, SAP_PORT, (void **) &sa, &salen);
+		sockfd = Udp_client(SAP_NAME, SAP_PORT, (SA **) &sa, &salen);
 	else if (argc == 4)
-		sockfd = Udp_client(argv[1], argv[2], (void **) &sa, &salen);
+		sockfd = Udp_client(argv[1], argv[2], (SA **) &sa, &salen);
 	else
 		err_quit("usage: mysdr <mcast-addr> <port#> <interface-name>");
 

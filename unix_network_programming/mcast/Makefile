@@ -1,6 +1,6 @@
 include ../Make.defines
 
-PROGS =	sendrecv udpcli05 udpcli06 udpserv01
+PROGS =	sendrecv udpcli01 udpcli05 udpcli06 udpserv01
 
 all:	${PROGS}
 

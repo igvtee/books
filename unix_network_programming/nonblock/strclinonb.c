@@ -54,7 +54,7 @@ str_cli(FILE *fp, int sockfd)
 
 			} else {
 #ifdef	VOL2
-				fprintf(stderr, "%s: read %d bytes from stdin\n", gf_time(), n);
+				fprintf(stderr, "%s: read %zd bytes from stdin\n", gf_time(), n);
 #endif
 				toiptr += n;			/* # just read */
 				FD_SET(sockfd, &wset);	/* try and write to socket below */
@@ -77,7 +77,7 @@ str_cli(FILE *fp, int sockfd)
 
 			} else {
 #ifdef	VOL2
-				fprintf(stderr, "%s: read %d bytes from socket\n",
+				fprintf(stderr, "%s: read %zd bytes from socket\n",
 								gf_time(), n);
 #endif
 				friptr += n;		/* # just read */
@@ -93,7 +93,7 @@ str_cli(FILE *fp, int sockfd)
 
 			} else {
 #ifdef	VOL2
-				fprintf(stderr, "%s: wrote %d bytes to stdout\n",
+				fprintf(stderr, "%s: wrote %zd bytes to stdout\n",
 								gf_time(), nwritten);
 #endif
 				froptr += nwritten;		/* # just written */
@@ -109,7 +109,7 @@ str_cli(FILE *fp, int sockfd)
 
 			} else {
 #ifdef	VOL2
-				fprintf(stderr, "%s: wrote %d bytes to socket\n",
+				fprintf(stderr, "%s: wrote %zd bytes to socket\n",
 								gf_time(), nwritten);
 #endif
 				tooptr += nwritten;	/* # just written */

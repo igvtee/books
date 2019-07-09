@@ -7,7 +7,7 @@ void
 dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 {
 	int						flags;
-#if defined(IP_RECVDSTADDR) || defined(IP_RECVIF)
+#if defined(IP_RECVDSTADDR) || defined(IP_RECVIF) || defined(IP_PKTINFO)
 	const int				on = 1;
 #endif
 	socklen_t				len;
@@ -24,6 +24,10 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 #ifdef	IP_RECVIF
 	if (setsockopt(sockfd, IPPROTO_IP, IP_RECVIF, &on, sizeof(on)) < 0)
 		err_ret("setsockopt of IP_RECVIF");
+#endif
+#ifdef IP_PKTINFO
+	if (setsockopt(sockfd, IPPROTO_IP, IP_PKTINFO, &on, sizeof(on)) < 0)
+		err_ret("setsockopt of IP_PKTINFO");
 #endif
 	bzero(&in_zero, sizeof(struct in_addr));	/* all 0 IPv4 address */
 

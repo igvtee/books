@@ -74,6 +74,19 @@ recvfrom_flags(int fd, void *ptr, size_t nbytes, int *flagsp,
 			continue;
 		}
 #endif
+
+#ifdef IP_PKTINFO
+		if (cmptr->cmsg_level == IPPROTO_IP &&
+			cmptr->cmsg_type == IP_PKTINFO) {
+			struct in_pktinfo *pi;
+
+			pi = (struct in_pktinfo *) CMSG_DATA(cmptr);
+			pktp->ipi_ifindex = pi->ipi_ifindex;
+			pktp->ipi_addr = pi->ipi_addr;
+			continue;
+		}
+#endif
+
 		err_quit("unknown ancillary data, len = %d, level = %d, type = %d",
 				 cmptr->cmsg_len, cmptr->cmsg_level, cmptr->cmsg_type);
 	}

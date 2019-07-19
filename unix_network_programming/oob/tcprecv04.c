@@ -3,7 +3,7 @@
 int
 main(int argc, char **argv)
 {
-	int		listenfd, connfd, n, on=1;
+	int		listenfd = -1, connfd, n, on=1;
 	char	buff[100];
 
 	if (argc == 2)
@@ -16,7 +16,7 @@ main(int argc, char **argv)
 	Setsockopt(listenfd, SOL_SOCKET, SO_OOBINLINE, &on, sizeof(on));
 
 	connfd = Accept(listenfd, NULL, NULL);
-	sleep(5);
+	//sleep(5);
 
 	for ( ; ; ) {
 		if (Sockatmark(connfd))

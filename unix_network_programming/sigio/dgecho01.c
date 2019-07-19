@@ -45,8 +45,8 @@ dg_echo(int sockfd_arg, SA *pcliaddr, socklen_t clilen_arg)
 	Signal(SIGHUP, sig_hup);
 	Signal(SIGIO, sig_io);
 	Fcntl(sockfd, F_SETOWN, getpid());
-	Ioctl(sockfd, FIOASYNC, &on);
-	Ioctl(sockfd, FIONBIO, &on);
+	Ioctl(sockfd, FIOASYNC, (void *)&on);
+	Ioctl(sockfd, FIONBIO, (void *)&on);
 
 	Sigemptyset(&zeromask);		/* init three signal sets */
 	Sigemptyset(&oldmask);

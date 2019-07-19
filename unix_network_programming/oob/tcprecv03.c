@@ -3,7 +3,7 @@
 int
 main(int argc, char **argv)
 {
-	int		listenfd, connfd, n, justreadoob = 0;
+	int		listenfd = -1, connfd, n, justreadoob = 0;
 	char	buff[100];
 	fd_set	rset, xset;
 

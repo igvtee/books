@@ -33,7 +33,7 @@ doit(void *vptr)
 
 	for (i = 0; i < NLOOP; i++) {
 		val = counter;
-		printf("%d: %d\n", pthread_self(), val + 1);
+		printf("%lu: %d\n", pthread_self(), val + 1);
 		counter = val + 1;
 	}
 

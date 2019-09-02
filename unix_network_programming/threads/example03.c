@@ -22,6 +22,7 @@
 	}
 
 #define	NLOOP	   	 50
+#undef BUFFSIZE
 #define	BUFFSIZE	 10
 
 struct buf_t {
@@ -43,7 +44,7 @@ main(int argc, char **argv)
 	int			n;
 	pthread_t	tidA, tidB;
 
-	printf("main, addr(stack) = %x, addr(global) = %x, addr(func) = %x\n",
+	printf("main, addr(stack) = %p, addr(global) = %p, addr(func) = %p\n",
 			&n, &buf_t, &produce_loop);
 	if ( (n = pthread_create(&tidA, NULL, &produce_loop, NULL)) != 0)
 		errno = n, err_sys("pthread_create error for A");
@@ -108,7 +109,7 @@ produce_loop(void *vptr)
 {
 	int		i;
 
-	printf("produce_loop thread, addr(stack) = %x\n", &i);
+	printf("produce_loop thread, addr(stack) = %p\n", &i);
 	for (i = 0; i < NLOOP; i++) {
 		produce(&buf_t, i);
 	}
@@ -119,9 +120,9 @@ produce_loop(void *vptr)
 void *
 consume_loop(void *vptr)
 {
-	int		i, val;
+	int		i, __attribute__ ((unused)) val;
 
-	printf("consume_loop thread, addr(stack) = %x\n", &i);
+	printf("consume_loop thread, addr(stack) = %p\n", &i);
 	for (i = 0; i < NLOOP; i++) {
 		val = consume(&buf_t);
 	}

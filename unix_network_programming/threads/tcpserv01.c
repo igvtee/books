@@ -5,7 +5,7 @@ static void	*doit(void *);		/* each thread executes this function */
 int
 main(int argc, char **argv)
 {
-	int				listenfd, connfd;
+	int				listenfd = -1, connfd;
 	pthread_t		tid;
 	socklen_t		addrlen, len;
 	struct sockaddr	*cliaddr;
@@ -22,15 +22,16 @@ main(int argc, char **argv)
 	for ( ; ; ) {
 		len = addrlen;
 		connfd = Accept(listenfd, cliaddr, &len);
-		Pthread_create(&tid, NULL, &doit, (void *) connfd);
+		Pthread_create(&tid, NULL, &doit, (void *) (intptr_t) connfd);
 	}
 }
 
 static void *
-doit(void *arg)
+doit(void *parg)
 {
+	int arg = (intptr_t)parg;
 	Pthread_detach(pthread_self());
-	str_echo((int) arg);	/* same function as before */
-	Close((int) arg);		/* done with connected socket */
+	str_echo(arg);	/* same function as before */
+	Close(arg);		/* done with connected socket */
 	return(NULL);
 }

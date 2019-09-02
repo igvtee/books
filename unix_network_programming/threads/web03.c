@@ -1,5 +1,5 @@
 #include	"unpthread.h"
-#include	<thread.h>		/* Solaris threads */
+//#include	<thread.h>		/* Solaris threads */
 
 #define	MAXFILES	20
 #define	SERV		"80"	/* port number or service name */
@@ -83,7 +83,7 @@ main(int argc, char **argv)
 				ndone--;
 				nconn--;
 				nlefttoread--;
-				printf("thread %d for %s done\n", fptr->f_tid, fptr->f_name);
+				printf("thread %lu for %s done\n", fptr->f_tid, fptr->f_name);
 			}
 		}
 		Pthread_mutex_unlock(&ndone_mutex);
@@ -104,7 +104,7 @@ do_get_read(void *vptr)
 
 	fd = Tcp_connect(fptr->f_host, SERV);
 	fptr->f_fd = fd;
-	printf("do_get_read for %s, fd %d, thread %d\n",
+	printf("do_get_read for %s, fd %d, thread %lu\n",
 			fptr->f_name, fd, fptr->f_tid);
 
 	write_get_cmd(fptr);	/* write() the GET command */

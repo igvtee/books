@@ -1,6 +1,6 @@
 include ../Make.defines
 
-PROGS =	web01 web02 web03 \
+PROGS =	web03 \
 	tcpcli01 tcpcli02 tcpserv01 tcpserv02 \
 	test01 example01 example02 example03
 

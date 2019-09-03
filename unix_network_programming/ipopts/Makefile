@@ -1,6 +1,6 @@
 include ../Make.defines
 
-PROGS =	tcpcli01 tcpserv01
+PROGS =	tcpcli01 tcpserv01 udpcli01 udpserv01
 
 all:	${PROGS}
 

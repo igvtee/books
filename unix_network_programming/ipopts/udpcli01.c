@@ -1,11 +1,11 @@
 #include	"unp.h"
+#include <linux/ipv6.h>
 
 int
 main(int argc, char **argv)
 {
-	int					c, sockfd, len = 0;
+	int					sockfd, len = 0;
 	u_char				*ptr = NULL;
-	void				*rth;
 	struct addrinfo		*ai;
 
 	if (argc < 2)

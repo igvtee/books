@@ -52,10 +52,12 @@ inet_srcrt_print(u_char *ptr, int len)
 {
 	u_char			c;
 	char			str[INET_ADDRSTRLEN];
+#ifndef __linux__
 	struct in_addr	hop1;
 
 	memcpy(&hop1, ptr, sizeof(struct in_addr));
 	ptr += sizeof(struct in_addr);
+#endif
 
 	while ( (c = *ptr++) == IPOPT_NOP)
 		;		/* skip any leading NOPs */
@@ -68,7 +70,9 @@ inet_srcrt_print(u_char *ptr, int len)
 		printf("received option type %d\n", c);
 		return;
 	}
+#ifndef __linux__
 	printf("%s ", Inet_ntop(AF_INET, &hop1, str, sizeof(str)));
+#endif
 
 	len = *ptr++ - sizeof(struct in_addr);	/* subtract dest IP addr */
 	ptr++;		/* skip over pointer */

@@ -19,7 +19,7 @@ readable_v6(void)
 	char				srcstr[INET6_ADDRSTRLEN], dststr[INET6_ADDRSTRLEN];
 	ssize_t				n;
 	socklen_t			len;
-	struct ip6_hdr		*ip6, *hip6;
+	struct ip6_hdr		*hip6;
 	struct icmp6_hdr	*icmp6;
 	struct udphdr		*udp;
 	struct sockaddr_in6	from, dest;
@@ -28,7 +28,7 @@ readable_v6(void)
 	len = sizeof(from);
 	n = Recvfrom(fd6, buf, MAXLINE, 0, (SA *) &from, &len);
 
-	printf("%d bytes ICMPv6 from %s:",
+	printf("%zd bytes ICMPv6 from %s:",
 		   n, Sock_ntop_host((SA *) &from, len));
 
 	icmp6 = (struct icmp6_hdr *) buf;		/* start of ICMPv6 header */

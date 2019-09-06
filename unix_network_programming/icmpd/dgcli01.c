@@ -53,7 +53,7 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 			else if (n != sizeof(icmpd_err))
 				err_quit("n = %d, expected %d", n, sizeof(icmpd_err));
 			printf("ICMP error: dest = %s, %s, type = %d, code = %d\n",
-				   Sock_ntop(&icmpd_err.icmpd_dest, icmpd_err.icmpd_len),
+				   Sock_ntop((const struct sockaddr *)&icmpd_err.icmpd_dest, icmpd_err.icmpd_len),
 				   strerror(icmpd_err.icmpd_errno),
 				   icmpd_err.icmpd_type, icmpd_err.icmpd_code);
 		}

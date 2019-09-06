@@ -13,7 +13,7 @@ int
 recv_v6(int seq, struct timeval *tv)
 {
 #ifdef	IPV6
-	int					hlen2, icmp6len, ret;
+	int					hlen2, icmp6len, ret = -3;
 	ssize_t				n;
 	socklen_t			len;
 	struct ip6_hdr		*hip6;
@@ -50,7 +50,7 @@ recv_v6(int seq, struct timeval *tv)
 				udp->uh_sport == htons(sport) &&
 				udp->uh_dport == htons(dport + seq))
 				ret = -2;		/* we hit an intermediate router */
-				break;
+			break;
 
 		} else if (icmp6->icmp6_type == ICMP6_DST_UNREACH) {
 			if (icmp6len < 8 + sizeof(struct ip6_hdr) + 4)

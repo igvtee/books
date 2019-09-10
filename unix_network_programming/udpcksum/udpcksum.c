@@ -39,11 +39,11 @@ test_udp(void)
 	canjump = 0;
 	alarm(0);
 
-	if (ui->ui_sum == 0)
+	if (ui->udph.check == 0)
 		printf("UDP checksums off\n");
 	else
 		printf("UDP checksums on\n");
 	if (verbose)
-		printf("received UDP checksum = %x\n", ntohs(ui->ui_sum));
+		printf("received UDP checksum = %x\n", ntohs(ui->udph.check));
 }
 /* end test_udp */

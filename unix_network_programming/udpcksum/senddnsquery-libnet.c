@@ -28,7 +28,7 @@ send_dns_query(void)
 {
 	char				 qbuf[24], *ptr;
 	u_int16_t			 one;
-	int					 packet_size = LIBNET_UDP_H + LIBNET_DNSV4_H + 24;
+	int					 packet_size = LIBNET_UDP_H + LIBNET_UDP_DNSV4_H + 24;
 	static libnet_ptag_t ip_tag, udp_tag, dns_tag;
 
 	/* build query portion of DNS packet */
@@ -42,15 +42,17 @@ send_dns_query(void)
 
 	/* build DNS packet */
 	dns_tag = libnet_build_dnsv4(
+			LIBNET_UDP_DNSV4_H,
 			1234 /* identification */,
 			0x0100 /* flags: recursion desired */,
 			1 /* # questions */, 	0 /* # answer RRs */,
 			0 /* # authority RRs */, 0 /* # additional RRs */,
-			qbuf /* query */, 24 /* length of query */, l, dns_tag);
+			(const uint8_t *) qbuf /* query */,
+			24 /* length of query */, l, dns_tag);
 	/* build UDP header */
 	udp_tag = libnet_build_udp(
-			((struct sockaddr_in *) local)->sin_port /* source port */,
-			((struct sockaddr_in *) dest)->sin_port /* dest port */,
+			ntohs(((struct sockaddr_in *) local)->sin_port) /* source port */,
+			ntohs(((struct sockaddr_in *) dest)->sin_port) /* dest port */,
 			packet_size /* length */, 0 /* checksum */,
 			NULL /* payload */, 0 /* payload length */, l, udp_tag);
 	/* Since we specified the checksum as 0, libnet will automatically */

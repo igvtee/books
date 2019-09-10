@@ -4,13 +4,16 @@
 #include	<netinet/in_systm.h>	/* required for ip.h */
 #include	<netinet/in.h>
 #include	<netinet/ip.h>
-#include	<netinet/ip_var.h>
 #include	<netinet/udp.h>
-#include	<netinet/udp_var.h>
 #include	<net/if.h>
 #include	<netinet/if_ether.h>
 
 #define	TTL_OUT		64				/* outgoing TTL */
+
+struct udpiphdr {
+	struct ip iph;
+	struct udphdr udph;
+};
 
 					/* declare global variables */
 extern struct sockaddr	*dest, *local;

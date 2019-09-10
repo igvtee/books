@@ -81,5 +81,6 @@ udp_check(char *ptr, int len)
 		return(ui);
 	} else
 		err_quit("not a UDP packet");
+	return NULL;
 }
 /* end udp_check */

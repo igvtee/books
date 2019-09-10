@@ -38,6 +38,6 @@ send_dns_query(void)
 	nbytes = (ptr - buf) - sizeof(struct udpiphdr);
 	udp_write(buf, nbytes);
 	if (verbose)
-		printf("sent: %d bytes of data\n", nbytes);
+		printf("sent: %zu bytes of data\n", nbytes);
 }
 /* end send_dns_query */

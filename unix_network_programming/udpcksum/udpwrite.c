@@ -13,7 +13,7 @@ open_output(void)
 	 * Also must set IP_HDRINCL so we can write our own IP headers.
 	 */
 
-	rawfd = Socket(dest->sa_family, SOCK_RAW, 0);
+	rawfd = Socket(dest->sa_family, SOCK_RAW, IPPROTO_RAW);
 
 	Setsockopt(rawfd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on));
 }
@@ -30,28 +30,33 @@ udp_write(char *buf, int userlen)
 {
 	struct udpiphdr		*ui;
 	struct ip			*ip;
+	struct udphdr *udp;
+	uint16_t ui_len;
 
 		/* 4fill in and checksum UDP header */
-	ip = (struct ip *) buf;
 	ui = (struct udpiphdr *) buf;
+	ip = &ui->iph;
+	udp = &ui->udph;
 	bzero(ui, sizeof(*ui));
 			/* 8add 8 to userlen for pseudoheader length */
-	ui->ui_len = htons((uint16_t) (sizeof(struct udphdr) + userlen));
+	ui_len = htons((uint16_t) (sizeof(struct udphdr) + userlen));
 			/* 8then add 28 for IP datagram length */
 	userlen += sizeof(struct udpiphdr);
 
-	ui->ui_pr = IPPROTO_UDP;
-	ui->ui_src.s_addr = ((struct sockaddr_in *) local)->sin_addr.s_addr;
-	ui->ui_dst.s_addr = ((struct sockaddr_in *) dest)->sin_addr.s_addr;
-	ui->ui_sport = ((struct sockaddr_in *) local)->sin_port;
-	ui->ui_dport = ((struct sockaddr_in *) dest)->sin_port;
-	ui->ui_ulen = ui->ui_len;
+	ip->ip_p = IPPROTO_UDP;
+	ip->ip_src = ((struct sockaddr_in *) local)->sin_addr;
+	ip->ip_dst = ((struct sockaddr_in *) dest)->sin_addr;
+	ip->ip_len = ui_len;
+
+	udp->source = ((struct sockaddr_in *) local)->sin_port;
+	udp->dest = ((struct sockaddr_in *) dest)->sin_port;
+	udp->len = ui_len;
 	if (zerosum == 0) {
 #if 1	/* change to if 0 for Solaris 2.x, x < 6 */
-		if ( (ui->ui_sum = in_cksum((u_int16_t *) ui, userlen)) == 0)
-			ui->ui_sum = 0xffff;
+		if ( (udp->check = in_cksum((u_int16_t *) ui, userlen)) == 0)
+			udp->check = 0xffff;
 #else
-		ui->ui_sum = ui->ui_len;
+		udp->check = ui_len;
 #endif
 	}
 

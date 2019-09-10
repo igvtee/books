@@ -95,7 +95,7 @@ main(int argc, char *argv[])
 
 	open_pcap();		/* open packet capture device */
 
-	setuid(getuid());	/* don't need superuser privileges anymore */
+	if (setuid(getuid()));	/* don't need superuser privileges anymore */
 
 	Signal(SIGTERM, cleanup);
 	Signal(SIGINT, cleanup);

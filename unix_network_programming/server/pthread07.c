@@ -1,8 +1,9 @@
 #include	"unpthread.h"
 #include	"pthread07.h"
+#include <inttypes.h>
 
 void
-thread_make(int i)
+thread_make(intptr_t i)
 {
 	void	*thread_main(void *);
 
@@ -20,13 +21,13 @@ thread_main(void *arg)
 
 	cliaddr = Malloc(addrlen);
 
-	printf("thread %d starting\n", (int) arg);
+	printf("thread %"PRIdPTR" starting\n", (intptr_t) arg);
 	for ( ; ; ) {
 		clilen = addrlen;
     	Pthread_mutex_lock(&mlock);
 		connfd = Accept(listenfd, cliaddr, &clilen);
 		Pthread_mutex_unlock(&mlock);
-		tptr[(int) arg].thread_count++;
+		tptr[(intptr_t) arg].thread_count++;
 
 		web_child(connfd);		/* process request */
 		Close(connfd);

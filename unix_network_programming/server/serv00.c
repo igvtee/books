@@ -4,7 +4,7 @@
 int
 main(int argc, char **argv)
 {
-	int					listenfd, connfd;
+	int					listenfd = -1, connfd;
 	void				sig_int(int), web_child(int);
 	socklen_t			clilen, addrlen;
 	struct sockaddr		*cliaddr;

@@ -1,5 +1,8 @@
 #include	"unp.h"
 
+void my_lock_wait();
+void my_lock_release();
+
 pid_t
 child_make(int i, int listenfd, int addrlen)
 {
@@ -10,6 +13,7 @@ child_make(int i, int listenfd, int addrlen)
 		return(pid);		/* parent */
 
 	child_main(i, listenfd, addrlen);	/* never returns */
+	return pid;
 }
 
 void

@@ -11,6 +11,7 @@ child_make(int i, int listenfd, int addrlen)
 		return(pid);		/* parent */
 
 	child_main(i, listenfd, addrlen);	/* never returns */
+	return pid;
 }
 /* end child_make */
 

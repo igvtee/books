@@ -1,6 +1,7 @@
 include ../Make.defines
 
 PROGS =	client clientrst \
+		serv00 serv09 serv02m serv03m \
 		serv01 serv02 serv03 serv04 serv05 serv06 serv07 serv08
 
 all:	${PROGS}

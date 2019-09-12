@@ -7,7 +7,7 @@ long			*cptr, *meter(int);	/* for counting #clients/child */
 int
 main(int argc, char **argv)
 {
-	int			listenfd, i;
+	int			listenfd = -1, i;
 	socklen_t	addrlen;
 	void		sig_int(int);
 	pid_t		child_make(int, int, int);

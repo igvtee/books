@@ -2,11 +2,12 @@
 
 static int		nchildren;
 static pid_t	*pids;
+void my_lock_init(char *pathname);
 
 int
 main(int argc, char **argv)
 {
-	int			listenfd, i;
+	int			listenfd = -1, i;
 	socklen_t	addrlen;
 	void		sig_int(int);
 	pid_t		child_make(int, int, int);

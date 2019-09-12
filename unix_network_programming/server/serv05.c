@@ -7,7 +7,7 @@ static int		nchildren;
 int
 main(int argc, char **argv)
 {
-	int			listenfd, i, navail, maxfd, nsel, connfd, rc;
+	int			listenfd = -1, i, navail, maxfd, nsel, connfd, rc;
 	void		sig_int(int);
 	pid_t		child_make(int, int, int);
 	ssize_t		n;

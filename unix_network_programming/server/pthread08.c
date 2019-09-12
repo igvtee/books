@@ -1,8 +1,9 @@
 #include	"unpthread.h"
 #include	"pthread08.h"
+#include <inttypes.h>
 
 void
-thread_make(int i)
+thread_make(intptr_t i)
 {
 	void	*thread_main(void *);
 
@@ -16,7 +17,7 @@ thread_main(void *arg)
 	int		connfd;
 	void	web_child(int);
 
-	printf("thread %d starting\n", (int) arg);
+	printf("thread %"PRIdPTR" starting\n", (intptr_t) arg);
 	for ( ; ; ) {
     	Pthread_mutex_lock(&clifd_mutex);
 		while (iget == iput)
@@ -25,7 +26,7 @@ thread_main(void *arg)
 		if (++iget == MAXNCLI)
 			iget = 0;
 		Pthread_mutex_unlock(&clifd_mutex);
-		tptr[(int) arg].thread_count++;
+		tptr[(intptr_t) arg].thread_count++;
 
 		web_child(connfd);		/* process request */
 		Close(connfd);

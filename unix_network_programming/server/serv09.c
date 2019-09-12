@@ -5,8 +5,8 @@
 int
 main(int argc, char **argv)
 {
-	int		i;
-	void	sig_int(int), thread_make(int);
+	intptr_t i;
+	void	sig_int(int), thread_make(intptr_t);
 
 	if (argc == 3)
 		listenfd = Tcp_listen(NULL, argv[1], &addrlen);

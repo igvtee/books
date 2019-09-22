@@ -1,7 +1,7 @@
-CFLAGS += -Wall -Wextra -Wpedantic -I../libubox
-LDFLAGS = -L../libubox
+CFLAGS += -Wall -Wextra -I../libubox
+LDFLAGS = -L../libubox -lubox -Wl,-rpath,../libubox
 
-program := list
+program := list safe_list
 
 .PHONY: all clean
 all: $(program)

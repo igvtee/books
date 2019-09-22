@@ -1,1 +1,1 @@
-git clone git://git.openwrt.org/projects/project/libubox.git
+git clone git://git.openwrt.org/project/libubox.git

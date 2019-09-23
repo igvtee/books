@@ -1,4 +1,4 @@
-CFLAGS += -Wall -Wextra -I../libubox
+CFLAGS += -Wall -Wextra -I../libubox -g3
 LDFLAGS = -L../libubox -lubox -Wl,-rpath,../libubox
 
 program := list safe_list

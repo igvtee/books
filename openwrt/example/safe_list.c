@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <safe_list.h>
 
+SAFE_LIST(glist);
+
 struct number {
 	struct safe_list list;
 	int num;
@@ -42,6 +44,26 @@ void number_del_num(struct safe_list *head, intptr_t del_num)
 	safe_list_for_each(head, del_num_cb, (void *) del_num);
 }
 
+int pr_num_cb(void *ctx __attribute__((unused)), struct safe_list *list)
+{
+	struct number *num;
+	int n = (intptr_t) ctx;
+
+	num = list_entry(list, __typeof__(*num), list);
+	if (num->num == n) {
+		number_del_num(&glist, 1);
+	}
+	printf("%d ", num->num);
+
+	return 0;
+}
+
+void number_pr_test(struct safe_list *head)
+{
+	safe_list_for_each(head, pr_num_cb, (void *) 0);
+	putchar('\n');
+}
+
 void number_clean(struct safe_list *head)
 {
 	struct number *num;
@@ -56,16 +78,14 @@ void number_clean(struct safe_list *head)
 int main(void)
 {
 	int i;
-	SAFE_LIST(list);
 
 	for (i = 0; i < 5; i++)
-		number_add(&list, i);
-	number_print(&list);
+		number_add(&glist, i);
+	number_print(&glist);
 
-	number_del_num(&list, 3);
-	number_print(&list);
+	number_pr_test(&glist);
 
-	number_clean(&list);
+	number_clean(&glist);
 
 	return 0;
 }

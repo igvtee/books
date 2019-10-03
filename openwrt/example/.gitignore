@@ -5,3 +5,9 @@ vlist
 kvlist
 utils
 blob
+blobmsg
+usock_tcpserv
+usock_tcpcli
+uloop_fd
+uloop_process
+uloop_timer

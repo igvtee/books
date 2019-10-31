@@ -1,12 +1,14 @@
 rm /etc/portage/package.*
 rm -rf /var/log/portage/*
+* remove no need packages
 
 emerge --sync
-emerge --update --newuse --deep --changed-deps --with-bdeps=y @system
-etc-update
-emerge -up sys-kernel/gentoo-sources
 * upgrade/rebuild kernel
+emerge -up gentoo-sources
+eselect kernel set
 emerge --update --newuse --deep --changed-deps --with-bdeps=y @world
+* or
+emerge --update --newuse --deep --changed-deps @world
 etc-update
 elogv
 emerge --depclean

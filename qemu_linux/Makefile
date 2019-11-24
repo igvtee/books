@@ -3,22 +3,25 @@ LINUX_PACKAGE=${LINUX_DIR}.tar.gz
 BUSYBOX_DIR=busybox-1.24.0
 BUSYBOX_PACKAGE=${BUSYBOX_DIR}.tar.bz2
 
-ARCH=i386
+ARCH=arm
 # environment
 ifeq (${ARCH},arm)
   CROSS_NAME=arm-linux-gnueabi
-  LIBC_PATH=lib
+  TC_PATH=toolchain/gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi
+  LIBC_PATH=${TC_PATH}/arm-linux-gnueabi/libc/lib
 endif
 ifeq (${ARCH},arm64)
   CROSS_NAME=aarch64-linux-gnu
-  LIBC_PATH=lib64
+  TC_PATH=toolchain/gcc-linaro-5.5.0-2017.10-x86_64_aarch64-linux-gnu
+  LIBC_PATH=${TC_PATH}/aarch64-linux-gnu/libc/lib
 endif
 ifeq (${ARCH},i386)
   CROSS_NAME=i686-pc-linux-gnu
   LIBC_PATH=lib
 endif
 CROSS_COMPILE=${CROSS_NAME}-
-export ARCH CROSS_COMPILE
+PATH:=$(PATH):${shell pwd}/${TC_PATH}/bin
+export ARCH CROSS_COMPILE PATH
 
 all: initramfs.cpio.gz linux
 
@@ -49,11 +52,11 @@ busybox: build/${ARCH}/busybox/_install/bin/busybox
 
 rootfs_libs:
 	mkdir -p rootfs/lib
-	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/ld-* rootfs/lib
-	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/libc-* rootfs/lib
-	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/libc.* rootfs/lib
-	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/libm-* rootfs/lib
-	cp -af /usr/${CROSS_NAME}/${LIBC_PATH}/libm.* rootfs/lib
+	cp -af ${LIBC_PATH}/ld-* rootfs/lib
+	cp -af ${LIBC_PATH}/libc-* rootfs/lib
+	cp -af ${LIBC_PATH}/libc.* rootfs/lib
+	cp -af ${LIBC_PATH}/libm-* rootfs/lib
+	cp -af ${LIBC_PATH}/libm.* rootfs/lib
 
 rootfs: busybox rootfs_libs
 	mkdir -p rootfs

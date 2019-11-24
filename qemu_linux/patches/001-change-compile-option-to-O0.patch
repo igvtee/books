@@ -33,12 +33,16 @@
  	compiletime_assert(__native_word(t),				\
 --- a/linux-4.0/Makefile
 +++ b/linux-4.0/Makefile
-@@ -616,7 +616,7 @@ KBUILD_CFLAGS	+= $(call cc-option,-fno-d
+@@ -616,7 +616,11 @@ KBUILD_CFLAGS	+= $(call cc-option,-fno-d
  ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
  KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
  else
 -KBUILD_CFLAGS	+= -O2
++ifeq ($(ARCH), arm64)
++KBUILD_CFLAGS	+= -O
++else
 +KBUILD_CFLAGS	+= -O0
++endif
  endif
  
  # Tell gcc to never replace conditional load with a non-conditional one

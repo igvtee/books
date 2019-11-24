@@ -26,3 +26,6 @@ crossdev --clean aarch64-linux-gnu
 >cross-aarch64-linux-gnu/gcc-5.4.0-r4
 >cross-aarch64-linux-gnu/linux-headers-3.18
 >cross-aarch64-linux-gnu/glibc-2.25-r11
+
+# pre-built toolchain
+https://www.linaro.org/downloads/

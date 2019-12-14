@@ -4,8 +4,9 @@ else
 include ../kernel_env.mk
 
 all:
-	$(MAKE) -C $(KDIR) M=$$PWD modules
+	echo $(PATH)
+	$(MAKE) -C $(KDIR) M=$$PWD O=$(BUILD_DIR) modules
 
 clean:
-	$(MAKE) -C $(KDIR) M=$$PWD clean
+	$(MAKE) -C $(KDIR) M=$$PWD O=$(BUILD_DIR) clean
 endif

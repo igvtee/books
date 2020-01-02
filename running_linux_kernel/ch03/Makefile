@@ -1,7 +1,7 @@
 ifneq ($(KERNELRELEASE),)
-obj-m := fcache.o
+obj-m :=
 else
-HOST_PROGS := slist
+HOST_PROGS := pfork
 
 include ../kernel_env.mk
 endif

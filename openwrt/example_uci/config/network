@@ -1,0 +1,10 @@
+config interface wan
+	option ipaddr '8.8.8.8'
+	option netmask '255.255.0.0'
+	list dns '1.1.1.1'
+	list dns '2.2.2.2'
+
+config interface lan
+	option ipaddr '192.168.0.1'
+	option netmask '255.255.255.0'
+

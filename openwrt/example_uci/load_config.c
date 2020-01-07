@@ -34,7 +34,7 @@ int main(void)
 	/* string option */
 	uci_foreach_element(&pkg->sections, e) {
 		s = uci_to_section(e);
-		printf("section:'%s'\n", s->e.name);
+		printf("section:'%s %s'\n", s->type, s->e.name);
 		if ((value = uci_lookup_option_string(ctx, s, "ipaddr"))) {
 			printf("\tipaddr:'%s'\n", value);
 		}

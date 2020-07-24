@@ -1,0 +1,18 @@
+# vlc
+dev-libs/libpcre2 pcre16
+sys-libs/zlib minizip static-libs
+
+# virt-manager
+dev-libs/libxml2 python
+
+# for broadcom sdk
+dev-lang/perl ithreads
+
+x11-libs/libxcb xkb
+
+app-arch/p7zip rar
+
+net-dns/avahi -systemd
+
+# docker
+sys-apps/systemd cgroup-hybrid

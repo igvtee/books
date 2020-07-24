@@ -1,0 +1,32 @@
+*background: #0f0f0f
+*foreground: #c8c8c8
+
+!black
+*color0:  #251f1f
+*color8:  #5e5e5e
+!red
+*color1:  #b21818
+*color9:  #eb4509
+!green
+*color2:  #18b218
+*color10: #95e76b
+!yellow
+*color3:  #b26818
+*color11: #ffac18
+!blue
+*color4:  #1818b2
+*color12: #46aede
+!magenta
+*color5:  #b218b2
+*color13: #e32c57
+!cyan
+*color6:  #18b2b2
+*color14: #d6dbac
+!white
+*color7:  #b2b2b2
+*color15: #efefef
+
+URxvt*font: xft:DejaVu Sans Mono:pixelsize=20
+
+xterm*font: 10x20
+xterm*allowBoldFonts: false

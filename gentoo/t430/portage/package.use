@@ -1,0 +1,106 @@
+# firmware
+#net-wireless/wireless-regdb
+#sys-kernel/linux-firmware savedconfig
+
+sys-apps/util-linux static-libs
+
+# firefox
+x11-libs/cairo X
+media-libs/libpng apng
+dev-lang/python sqlite
+media-plugins/alsa-plugins pulseaudio
+www-client/firefox-bin l10n_zh-TW pulseaudio
+
+# mesa
+media-libs/libglvnd X
+
+# awesome
+x11-libs/cairo xcb
+x11-libs/libxcb xkb
+x11-libs/libxkbcommon X
+media-gfx/imagemagick png
+#x11-base/xorg-drivers
+
+# theme
+x11-misc/slim branding
+
+# vlc
+sys-libs/zlib minizip
+x11-libs/libva X
+dev-libs/libpcre2 pcre16
+media-video/vlc upnp
+
+# wireshark
+app-text/xmlto text
+sys-apps/dbus X
+
+# fcitx
+# fcitx-configtool
+# fcitx-chewing
+# fcitx-table-extra
+# app-i18n/fcitx-qt5
+
+# X apps
+x11-terms/rxvt-unicode xft -perl
+app-text/mupdf X
+net-wireless/wpa_supplicant qt5 wps
+#media-gfx/gqview
+#sci-calculators/galculator
+#x11-apps/xrandr
+#www-misc/profile-sync-daemon
+
+# font
+media-fonts/noto X cjk -extra
+media-fonts/dejavu
+
+# openwrt
+sys-libs/zlib static-libs
+
+# broadcom sdk
+dev-lang/perl ithreads
+#sys-libs/zlib abi_x86_32
+#app-arch/bzip2 abi_x86_32
+#dev-libs/elfutils abi_x86_32
+#sys-libs/ncurses abi_x86_32
+
+# apps
+app-arch/p7zip rar
+sys-apps/hdparm
+net-misc/iperf
+dev-vcs/git
+dev-vcs/subversion
+sys-apps/ethtool
+net-wireless/iw
+app-editors/vim cscope
+app-editors/hexedit
+dev-util/strace
+dev-libs/fstrm
+
+net-analyzer/tcpreplay
+xys-devel/autogen libopts
+
+sys-boot/grub mount -themes -fonts
+sys-fs/ntfs3g
+
+# audio
+media-sound/moc mad
+#media-sound/alsa-utils
+
+#sys-apps/flashrom -ft2232_spi -usbblaster_spi -dediprog -pickit2_spi
+
+# displaycal
+x11-libs/wxGTK tiff
+x11-libs/pango X
+# dev-python/numpy
+# media-gfx/argyllcms
+
+# spotify
+dev-libs/libxml2 python
+#app-text/ghostscript-gpl cups
+
+# coreboot
+# dev-lang/gnat-gpl
+# media-fonts/unifont
+
+# docker
+sys-apps/systemd cgroup-hybrid

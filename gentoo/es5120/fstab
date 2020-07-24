@@ -1,0 +1,43 @@
+# /etc/fstab: static file system information.
+#
+# noatime turns off atimes for increased performance (atimes normally aren't 
+# needed); notail increases performance of ReiserFS (at the expense of storage 
+# efficiency).  It's safe to drop the noatime options if you want and to 
+# switch between notail / tail freely.
+#
+# The root filesystem should have a pass number of either 0 or 1.
+# All other filesystems should have a pass number of 0 or greater than 1.
+#
+# See the manpage fstab(5) for more information.
+#
+
+# <fs>			<mountpoint>	<type>		<opts>		<dump/pass>
+
+# NOTE: If your BOOT partition is ReiserFS, add the notail option to opts.
+PARTUUID=498a76eb-1fd9-4477-800b-81d54b7c83be		/boot		btrfs		noatime,noauto											0 0
+PARTUUID=130cbd4c-cbbc-4db8-bf39-f2b06afc68fd		/			btrfs		noatime,compress=lzo,autodefrag,subvol=root				0 0
+PARTUUID=342a5ca2-8832-4197-9f30-6d5958707a65		/usr/portage/distfiles	btrfs		noatime,autodefrag,subvol=distfiles			0 0
+PARTUUID=342a5ca2-8832-4197-9f30-6d5958707a65		/home		btrfs		noatime,compress=lzo,autodefrag,subvol=home				0 0
+# 包含協力廠商附加應用程式軟體套件
+PARTUUID=342a5ca2-8832-4197-9f30-6d5958707a65		/opt		btrfs		noatime,compress=lzo,autodefrag,subvol=opt				0 0
+# 包含 http 與 ftp 檔案
+#PARTUUID=130cbd4c-cbbc-4db8-bf39-f2b06afc68fd		/srv		btrfs		noatime,compress=lzo,autodefrag,subvol=srv				0 0
+# 包含暫存檔案
+#PARTUUID=130cbd4c-cbbc-4db8-bf39-f2b06afc68fd		/tmp		btrfs		noatime,compress=lzo,autodefrag,subvol=tmp				0 0
+# 包含系統和應用程式的記錄檔案，這些檔案永遠不會得到復原
+#PARTUUID=130cbd4c-cbbc-4db8-bf39-f2b06afc68fd		/var/log	btrfs		noatime,compress=lzo,autodefrag,subvol=var/log			0 0
+# 包含執行時期變數資料
+#PARTUUID=130cbd4c-cbbc-4db8-bf39-f2b06afc68fd		/var/run	btrfs		noatime,compress=lzo,autodefrag,subvol=var/run			0 0
+# 包含等待程式、使用者或管理員處理的資料，例如新聞、郵件及印表機佇列
+PARTUUID=130cbd4c-cbbc-4db8-bf39-f2b06afc68fd		/var/spool	btrfs		noatime,compress=lzo,autodefrag,subvol=var/spool		0 0
+# 包含在各子系統重新開機期間保留的暫存檔案或目錄
+#PARTUUID=130cbd4c-cbbc-4db8-bf39-f2b06afc68fd		/var/tmp	btrfs		noatime,compress=lzo,autodefrag,subvol=var/tmp			0 0
+PARTUUID=130cbd4c-cbbc-4db8-bf39-f2b06afc68fd		/var/lib/libvirt/images			btrfs		noatime,nodatacow,subvol=vm				0 0
+
+#/dev/cdrom			/mnt/cdrom			auto		noauto,ro				0 0
+#/dev/fd0			/mnt/floppy			auto		noauto					0 0
+/dev/mmcblk0p1		/mnt/sd				auto		noauto,user,noatime,nofail,x-systemd.automount,x-systemd.device-timeout=5	0 0
+
+#shm					/dev/shm			tmpfs		nodev,nosuid,noatime	0 0
+#debugfs			/sys/kernel/debug	debugfs		rw						0 0
+/dev/sdc1			/mnt/usb			auto		noauto,user,noatime,nofail,x-systemd.automount,x-systemd.device-timeout=1	0 0

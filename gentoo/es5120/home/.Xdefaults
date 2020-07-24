@@ -1,0 +1,12 @@
+urxvt.background: black
+urxvt.foreground: 7
+urxvt.cursorcolor: green
+urxvt.underlinecolor: green
+
+urxvt.font: xft:DejaVu Sans Mono:pixelsize=24,\
+	xft:AR PL Mingti2L Big5:pixelsize=24
+urxvt.preeditType: root
+urxvt.imLocale: zh_TW.UTF-8
+#urxvt.transparent: on
+urxvt.shading: 30
+urxvt.saveLines: 6000

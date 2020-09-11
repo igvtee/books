@@ -1,4 +1,4 @@
-EXECS = lua_mini
+EXECS =
 LIBS = mylib.so
 TEMPS =
 CFLAGS = -llua
@@ -8,12 +8,15 @@ all: $(EXECS) $(LIBS)
 %.so: %.c
 	$(CC) $(CFLAGS) -shared -fPIC -o $@ $<
 
-lua_mini: lua_mini.c $(LIBS)
-	$(CC) $(CFLAGS) -lm -o $@ $^
+mylib.so: counter.o map.o split.o
+	$(CC) $(CFLAGS) -shared -o $@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
 .PHONY:clean usage
 clean:
-	rm -f $(EXECS) $(LIBS) $(TEMPS)
+	rm -f $(EXECS) $(LIBS) $(TEMPS) *.o
 
 usage:
 	@echo "   === example usage ==="

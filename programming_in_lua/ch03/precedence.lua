@@ -1,18 +1,14 @@
 --[[
 ^
-not		- (unary)
-*		/
-+		-
-..
-<		>		<=		>=		~=		==
+unary operators	(- # ~ not)
+* / // %
++ -
+..		(concatentation)
+<< >>		(bitwise shifts)
+&		(bitwise AND)
+~		(bitwise exclusive OR)
+|		(bitwise OR)
+< > <= >= ~= ==
 and
 or
-]]--
-
---[[
-a+i < b/2+1		<-->	(a+i) < ((b/2)+1)
-5+x^2*8			<-->	5+((x^2)*8)
-a < y and y <= z	<-->	(x < y) and (y <= z)
--x^2			<-->	-(x^2)
-x^y^z			<-->	x^(y^z)
-]]--
+--]]

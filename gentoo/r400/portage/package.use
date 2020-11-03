@@ -1,0 +1,85 @@
+# tools
+app-editors/vim cscope -X
+app-portage/gentoolkit
+sys-apps/pciutils
+sys-kernel/linux-firmware
+app-misc/screen
+sys-apps/lm-sensors
+app-arch/p7zip rar
+sys-apps/lshw
+
+# network
+net-misc/iperf
+sys-apps/ethtool
+net-misc/netkit-telnetd
+net-analyzer/openbsd-netcat
+net-ftp/tftp-hpa
+sys-apps/ethtool
+
+# wireless
+net-wireless/iw
+net-wireless/wpa_supplicant qt5 wps
+net-wireless/wireless-regdb
+
+# microcode
+sys-firmware/intel-microcode
+sys-apps/iucode_tool
+
+# disk
+www-misc/profile-sync-daemon
+sys-apps/hdparm
+sys-fs/dosfstools
+
+# develop tools
+dev-vcs/git
+dev-vcs/subversion
+dev-util/quilt
+
+# sound
+media-sound/alsa-utils
+
+# X window
+x11-libs/libva X
+dev-libs/libpcre2 pcre16
+media-libs/libglvnd X
+x11-base/xorg-server
+x11-terms/rxvt-unicode xft
+app-text/mupdf X
+media-gfx/gqview
+sci-calculators/galculator
+
+# fcitx
+app-i18n/fcitx-configtool
+app-i18n/fcitx-chewing
+app-i18n/fcitx-table-extra
+app-i18n/fcitx-qt5
+sys-apps/dbus X
+
+www-client/firefox-bin l10n_zh-TW
+
+# vlc
+media-video/vlc upnp
+sys-libs/zlib minizip
+
+# wireshark
+net-analyzer/wireshark
+app-text/xmlto text
+
+# font
+media-fonts/dejavu
+media-fonts/noto X cjk -extra
+media-fonts/noto-cjk X
+
+# awesome
+x11-wm/awesome
+x11-libs/cairo X
+x11-libs/libxkbcommon X
+media-gfx/imagemagick png
+
+# docker
+sys-apps/systemd cgroup-hybrid
+
+# thinkpad
+app-laptop/thinkfan
+
+sys-apps/flashrom -ft2232-spi -usbblaster-spi -dediprog -pickit2-spi

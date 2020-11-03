@@ -1,0 +1,17 @@
+# 關閉啟動訊息。
+startup_message off
+
+# 加入狀態列。
+caption always "%{=u .r} %-w%<%{=ub .Y}%n %t%{=u .r}%+w "
+hardstatus alwaysignore
+hardstatus alwayslastline "%{= .K} [%l]%<%=%{= .Y}$USER%{= .R}@%H %=%{= .m} %Y/%m/%d%{= .M} %0c "
+
+# 將預設編碼設為 UTF-8。
+defutf8 on
+
+#Create 3 screens on startup
+screen -t sh1 0
+screen -t sh2 1
+screen -t sh3 2
+screen -t sh4 3
+screen -t sh5 4

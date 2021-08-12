@@ -2,6 +2,10 @@ LINUX_DIR=linux-4.0
 LINUX_PACKAGE=${LINUX_DIR}.tar.gz
 BUSYBOX_DIR=busybox-1.24.0
 BUSYBOX_PACKAGE=${BUSYBOX_DIR}.tar.bz2
+TOOLCHAIN_ARM=gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi.tar.xz
+TOOLCHAIN_ARM_PATH=toolchain/gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi
+TOOLCHAIN_ARM64=gcc-linaro-5.5.0-2017.10-x86_64_aarch64-linux-gnu.tar.xz
+TOOLCHAIN_ARM64_PATH=toolchain/gcc-linaro-5.5.0-2017.10-x86_64_aarch64-linux-gnu
 
 ARCH=arm
 # environment
@@ -23,7 +27,7 @@ CROSS_COMPILE=${CROSS_NAME}-
 PATH:=$(PATH):${shell pwd}/${TC_PATH}/bin
 export ARCH CROSS_COMPILE PATH
 
-all: initramfs.cpio.gz linux
+all: toolchain initramfs.cpio.gz linux
 
 ${LINUX_PACKAGE}:
 	wget https://www.kernel.org/pub/linux/kernel/v4.x/${LINUX_PACKAGE}
@@ -31,6 +35,24 @@ ${LINUX_PACKAGE}:
 ${LINUX_DIR}: ${LINUX_PACKAGE}
 	tar zxf ${LINUX_PACKAGE}
 	touch ${LINUX_DIR}
+
+${TOOLCHAIN_ARM}:
+	wget https://releases.linaro.org/components/toolchain/binaries/5.5-2017.10/arm-linux-gnueabi/${TOOLCHAIN_ARM}
+
+${TOOLCHAIN_ARM_PATH}: ${TOOLCHAIN_ARM}
+	mkdir -p toolchain
+	tar Jxf ${TOOLCHAIN_ARM} -C toolchain
+	touch ${TOOLCHAIN_ARM_PATH}
+
+${TOOLCHAIN_ARM64}:
+	wget https://releases.linaro.org/components/toolchain/binaries/5.5-2017.10/aarch64-linux-gnu/${TOOLCHAIN_ARM64}
+
+${TOOLCHAIN_ARM64_PATH}: ${TOOLCHAIN_ARM64}
+	mkdir -p toolchain
+	tar Jxf ${TOOLCHAIN_ARM64} -C toolchain
+	touch ${TOOLCHAIN_ARM64_PATH}
+
+toolchain: ${TOOLCHAIN_ARM_PATH} ${TOOLCHAIN_ARM64_PATH}
 
 ${BUSYBOX_PACKAGE}:
 	wget https://busybox.net/downloads/${BUSYBOX_PACKAGE}

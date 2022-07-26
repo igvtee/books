@@ -1,0 +1,22 @@
+#
+# This file is parsed by pam_env module
+#
+# Syntax: simple "KEY=VAL" pairs on separate lines
+#
+LANG=zh_TW.utf8
+
+INPUT_METHOD=fcitx
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+
+# Enable Wayland support for Mozilla Firefox
+MOZ_ENABLE_WAYLAND=1
+QT_QPA_PLATFORM=wayland
+GDK_BACKEND=wayland
+CLUTTER_BACKEND=wayland
+LIBVA_DRIVER_NAME=iHD
+XDG_CURRENT_DESKTOP=sway
+XDG_SESSION_DESKTOP=sway
+
+QT_SCALE_FACTOR=1.3

@@ -1,0 +1,24 @@
+app-editors/vim cscope
+sys-apps/systemd policykit
+media-libs/libvpx postproc
+
+sys-libs/zlib minizip
+app-text/xmlto text
+dev-qt/qtgui egl
+
+x11-libs/cairo X
+x11-libs/libxkbcommon X
+x11-libs/libva X
+
+media-sound/moc mad
+media-fonts/noto cjk -extra
+
+media-video/vlc xml
+dev-libs/weston wayland-compositor
+
+# qpdfview 
+app-text/poppler qt5 cairo
+
+# xwayland
+gui-libs/wlroots X
+gui-wm/sway X tray

@@ -34,6 +34,8 @@ ${LINUX_PACKAGE}:
 
 ${LINUX_DIR}: ${LINUX_PACKAGE}
 	tar zxf ${LINUX_PACKAGE}
+	patch -p1 < patches/001-change-compile-option-to-O0.patch
+	patch -p1 < patches/002-fix-new-gcc-cause-dtc-error.patch
 	touch ${LINUX_DIR}
 
 ${TOOLCHAIN_ARM}:

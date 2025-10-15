@@ -1,0 +1,21 @@
+b bubble_sort
+commands 1
+  printf "The original value of n is %d\n", n
+  set var n=10
+  printf "Current value of n is %d\n", n
+  continue
+end
+
+b 8 if i==n
+command 2
+  printf "i = %d, n = %d\n", i, n
+  return
+  continue
+end
+
+b 24 if i==10
+command 3
+  printf "i=%d, exit from for loop!\n", i
+  jump 26
+  continue
+end

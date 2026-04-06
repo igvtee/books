@@ -1,0 +1,15 @@
+gentoo:
+  emerge --ask dev-lang/python:3.11
+  edit find_python.sh change "python3" to "python3.11"
+  edit dpdk_setup_ports.py change "--ignore-numa" default to "True"
+
+./dpdk_setup_ports.py -s
+cp cfg/simple_cfg.yaml /etc/trex_cfg.yaml
+edit /etc/trex_cfg.yaml
+./dpdk_setup_ports.py -c 01:00.0 01:00.1 -o /etc/trex_cfg.yaml
+
+ip link set enp1s0f0 down
+/dpdk_nic_bind.py --bind=vfio-pci 01:00.0 01:00.1
+./dpdk_setup_ports.py
+
+./t-rex-64 -i -c 7

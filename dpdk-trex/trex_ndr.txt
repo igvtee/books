@@ -1,0 +1,116 @@
+* rfc 2544 frame size 64 512 1518
+* throughput : 60s
+* frame loss rate : 30s
+* latency : 5 times. 2s or 60s
+
+* start server
+./t-rex-64 -i
+
+* start ndr script example
+./ndr --stl --port 0 1 --max-iterations 5 -t 10 --verbose --force-map --bi-dir --pdr 0.01 --title 'Documentation'
+
+* To find NDR (pdr = 0%) with 3% allowed error and 5.5% queueing capability:
+./ndr --stl --port 0 1 --max-iterations 10 -v --pdr 0 --pdr-error 3 --q-full 5.5 --force-map
+
+* To find NDR with pdr = 2% and a maximal latency of 30 msec with tolerance of 5%
+./ndr --stl --port 0 1 --max-iterations 10 -v --max-latency 30 --lat-tolerance 5 --force-map --profile stl/udp_1pkt_src_ip_split_latency.py
+
+* assign packet_len argument for udp profile
+./ndr --stl --port 0 1 --max-iterations 10 -v --force-map --profile stl/udp_for_benchmarks.py --prof-tun packet_len=1518
+
+* for benchmarking
+./ndr --stl --port 0 1 --max-iterations 10 -v --force-map --profile stl/bench.py --prof-tun size=1518,flow=no-fs
+
+* optimized binary search
+./ndr --stl --port 0 1 --max-iterations 10 -v --force-map --opt-bin-search --opt-bin-search-percent 10
+
+========================================================
+./ndr --stl --help
+options:
+  -h, --help            show this help message and exit
+  -s, --server SERVER   TRex server address. Default is local.
+  -p, --pdr PDR         Allowed percentage of drops. (out of total traffic). [0(NDR)-100]
+  -t, --iter-time ITERATION_DURATION
+                        Duration of each run iteration during test. [seconds]
+  -n, --ndr-results NDR_RESULTS
+                        calculates the benchmark at each point scaled linearly under NDR [1-10].The results for ndr_results=2 are NDR and NDR/2.
+  -ti, --title TITLE    Title for this benchmark test.
+  -ft, --first_run_duration_time FIRST_RUN_DURATION
+                        The first run tests for the capability of the device. 100% operation will be tested after half of the duration. Shorter times may lead to inaccurate measurement [seconds]
+  -v, --verbose         When verbose is set, prints test results and iteration to stdout.
+  -x, --max-iterations MAX_ITERATIONS
+                        The bench stops when reaching result or max_iterations, the early of the two. [int]
+  -e, --pdr-error PDR_ERROR
+                        The error around the actual result, in percent. 0% error is not recommended due to precision issues. [percents 0-100]
+  -q, --q-full Q_FULL_RESOLUTION
+                        Percent of traffic allowed to be queued when transmitting above DUT capability. 0% q-full resolution is not recommended due to precision issues. [percents 0-100]
+  --max-latency MAX_LATENCY
+                        Maximal latency allowed. If the percent of latency packets above this value pass the latency tolerance, then the rate is considered too high. If the value is 0, then we
+                        consider this as unset. Default=0. [usec]
+  --lat-tolerance LAT_TOLERANCE
+                        Percentage of latency packets allowed beyond max-latency. Default is 0%. In this case we compare max-latency to the maximal latency in a run. [percents 0-100]
+  -o, --output OUTPUT   Output file where to write results in the JSON format.
+  --ports [PORTS_LIST ...]
+                        Specify an even list of ports for running traffic on.
+  --yaml YAML           use YAML file for configurations, use --yaml PATH\TO\YAML.yaml
+  --force-map           Ignore map table configuration and use the specified port list.
+  --bi-dir              Specify bi-directional traffic.
+  -f, --plugin-file PLUGIN_FILE
+                        Provide the plugin file for the plugin that implements the pre and post iteration functions.
+  --tunables TUNABLES   Tunables to forward to the plugin if it exists. Use: --tunables a=1,b=2,c=3 (no spaces).
+  --opt-bin-search      Optimized binary search, makes use of the drop rate to optimize the first search interval. When drop occurs, the tool tries to find a better (smaller) interval to start
+                        the search on.If this parameter is true, the default value is 5 percent, the tool will search for ndr in an interval of [assumed-rate - 5 percent, assumed rate + 5
+                        percent] where assumed-rate is (100-drop_rate)% of max_rate.
+  --opt-bin-search-percent OPT_BINARY_SEARCH_PERCENTAGE
+                        Use this to configure the percentage parameter for opt-bin-search.
+  --profile PROFILE     Path to the profile we want to load. The profile defines the type of traffic we sent and the drop point differs depending on the traffic type.
+  --prof-tun PROFILE_TUNABLES
+                        Tunables to forward to the profile if it exists. Use: --prof-tun a=1,b=2,c=3 (no spaces).
+
+
+========================================================
+* astf version start server
+./t-rex-64 -i --astf
+
+./ndr --astf -v -x 10 -e 1 -q 2 -lpps 80 --max-latency 50 --lat-tolerance 10 -o hu -f automation/trex_control_plane/interactive/trex/examples/astf/astf_error_logging_plugin.py --profile astf/udp_mix.py --high-mult 80 --low-mult 20
+
+./ndr --astf -v --profile astf/http_simple.py --high-mult 1000 --low-mult 500
+./ndr --astf -v --profile astf/sfr.py --high-mult 50 --low-mult 0
+
+./ndr --astf -v --high-mult 75 --low-mult 25 -lpps 50 --max-latency 30 --lat-tolerance 10
+
+./ndr --astf -v --plugin-file automation/trex_control_plane/interactive/trex/examples/astf/astf_error_logging_plugin.py --high-mult 600000 --low-mult 400000 --profile astf/http_simple.py
+
+========================================================
+./ndr --astf --help
+options:
+  -h, --help            show this help message and exit
+  -s, --server SERVER   TRex server address. Default is local.
+  -t, --iter-time ITERATION_DURATION
+                        Duration of each run iteration during test. [seconds]
+  -ti, --title TITLE    Title for this benchmark test
+  -v, --verbose         When verbose is set, prints test results and iteration to stdout.
+  -x, --max-iterations MAX_ITERATIONS
+                        The bench stops when reaching result or max_iterations, the early of the two. [int]
+  -e, --allowed-error ALLOWED_ERROR
+                        The error around the actual result, in percent. 0% error is not recommended due to precision issues. [percents 0-100]
+  -q, --q-full Q_FULL_RESOLUTION
+                        Percent of traffic allowed to be queued when transmitting above dut capability. 0% q-full resolution is not recommended due to precision issues. [percents 0-100]
+  -lpps, --latency-pps LATENCY_PPS
+                        Rate of latency in packets per second. Default is 0, meaning no latency packets.
+  --max-latency MAX_LATENCY
+                        Maximal latency allowed. If the percent of latency packets above this value passes the latency tolerance, then the rate is considered too high. If the value is 0, then we
+                        consider this as unset. Default=0. [usec]
+  --lat-tolerance LAT_TOLERANCE
+                        Percentage of latency packets allowed beyond max-latency. Default is 0%. In this case we compare max-latency to the maximal latency in a run. [percents 0-100]
+  -o, --output OUTPUT   If you specify this flag, after the test is finished, the final results will be printed in the requested format.Use json for JSON format or hu for human readable format.
+  --yaml YAML           use YAML file for configurations, use --yaml PATH\TO\YAML.yaml
+  -f, --plugin-file PLUGIN_FILE
+                        Provide the plugin file for the plugin that implements the pre and post iteration functions.
+  --tunables TUNABLES   Tunables to forward to the plugin if it exists. Use: --tunables a=1,b=2,c=3 (no spaces).
+  --profile PROFILE     Path to the profile we want to load. The profile defines the type of traffic we send and the NDR differs depending on the traffic type.
+  --prof-tun PROFILE_TUNABLES
+                        Tunables to forward to the profile if it exists. Use: --prof-tun a=1,b=2,c=3 (no spaces).
+  --high-mult HIGH_MULT
+                        Higher bound of the interval in which the NDR point is found.
+  --low-mult LOW_MULT   Lower bound of the interval in which the NDR point is found.

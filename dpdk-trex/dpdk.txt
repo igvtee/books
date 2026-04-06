@@ -1,0 +1,71 @@
+kernel:
+  enable CONFIG_VFIO_PCI
+
+gentoo:
+  emerge dev-python/pyelftools
+  emerge sys-process/numactl
+  emerge app-admin/sudo
+
+check network ports:
+  ./usertools/dpdk-devbind.py --status
+
+bind to vfio-pci driver:
+  ./usertools/dpdk-devbind.py --bind=vfio-pci 01:00.0 01:00.1
+
+unbind driver:
+  ./usertools/dpdk-devbind.py --bind=i40e 01:00.0 01:00.1
+
+hugepage setup:
+  ./usertools/dpdk-hugepages.py --show
+  ./usertools/dpdk-hugepages.py --setup 4G
+
+test driver works:
+  ./build/app/dpdk-testpmd -c7 -- -i --nb-cores=2 --nb-ports=2
+  show port stats all
+  start tx_first
+  stop
+
+  show config txpkts
+  set txpkts 1500
+  set txpkts 64
+
+meson install
+meson uninstall
+
+pktgen-dpdk:
+  PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig make buildlua
+  edit meson.build add option '-Wno-stringop-overflow' on warning_flags
+
+  export RTE_SDK=/usr/local
+
+  edit cfg/default.cfg
+  ./tools/run.py -s default
+  ./tools/run.py default
+
+set 0 proto udp
+range 0 src mac start [$MAC]
+range 0 src mac min [$MAC]
+range 0 src mac inc 00:00:00:00:00:00
+range 0 dst mac start ee:ff:ff:ff:ff:ff
+range 0 dst mac min ee:ff:ff:ff:ff:ff
+range 0 dst mac inc 00:00:00:00:00:00
+range 0 src port start 10000
+range 0 src port min 10000
+range 0 src port max 10000
+range 0 src port inc 0
+range 0 dst port start 2000
+range 0 dst port min 2000
+range 0 dst port max 2255
+range 0 dst port inc 1
+range 0 proto udp
+range 0 src ip start [$Local_IP]
+range 0 src ip min [$Local_IP]
+range 0 src ip inc 0.0.0.0
+range 0 size start 64
+range 0 size min 64
+range 0 size max 64
+range 0 size inc 0
+range 0 dst ip start [$Receive_IP]
+range 0 dst ip min [$Receive_IP]
+range 0 dst ip inc 0.0.0.0
+enable all range

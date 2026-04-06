@@ -1,0 +1,25 @@
+* advance stateful support
+use FreeBSD tcp code
+to solve DUT is TCP proxy or use two trex as client and server
+
+* start trex in astf mode
+./t-rex-64 -i --astf
+
+* enable console
+./trex-console -s [server-ip]
+start -f astf/http_simple.py -m 1000 -d 1000 -l 1000
+tui
+[ESC] t/l for astf statistics and latency
+stop
+
+* simulator
+./astf-sim -f astf/http_simple.py -o b
+./astf-sim -f astf/http_simple.py --full -o b.pcap
+
+* Service mode can be useful when writing Python plugins for emulation (example: IPV6 ND/DHCP) to prepare the setup. Then you can move to normal mode for high speed testing.
+* With ASTF mode, it is possible to work in either client mode or server mode.
+
+* interactive mode : Python profiles of topology can be used
+* emulation client clustering
+* ipv6
+* dynamic multiple profiles support

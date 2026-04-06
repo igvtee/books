@@ -1,0 +1,5 @@
+git clone https://github.com/cisco-system-traffic-generator/trex-core.git
+edit src/dpdk/drivers/net/meson.build select drivers you need. (ex. igc)
+cd linux_dpdi
+./b configure --no-bnxt --no-mlx=NO_MLX --no-old --new-memory
+./b build -j4

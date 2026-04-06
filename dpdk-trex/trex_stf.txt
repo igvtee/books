@@ -1,0 +1,62 @@
+* DUT set static ip and routing
+echo 1 > /proc/sys/net/ipv4/ip_forward
+ip link set dev enp5s0 up
+ip link set dev enp6s0 up
+ip a a 11.11.11.1/24 brd + dev enp5s0
+ip a a 12.12.12.1/24 brd + dev enp6s0
+ip r a 16.0.0.0/8 via 11.11.11.2
+ip r a 48.0.0.0/8 via 12.12.12.2
+
+* start trex
+./t-rex-64 -f cap2/dns.yaml -m 1 -d 10 -l 1000
+ -m <num>                   : Rate multiplier.  Multiply basic rate of templates by this number
+ -d                         : Duration of the test in sec (default is 3600). Look also at --nc
+ -l <rate>                  : In parallel to the test, run latency check, sending packets at rate/sec from each interface
+ -p                         : Send all flow packets from the same interface (chosen randomly between client ad server ports) without changing their src/dst IP
+ --ipv6                     : Work in ipv6 mode
+ --learn-mode [1-3]         : Used for working in NAT environments. Dynamically learn the NAT translation done by the DUT
+      1    In case of TCP flow, use TCP ACK in first SYN to pass NAT translation information. Initial SYN packet must be first packet in the TCP flow
+           In case of UDP stream, NAT translation information will pass in IP ID field of first packet in flow. This means that this field is changed by TRex
+      2    Add special IP option to pass NAT translation information to first packet of each flow. Will not work on certain firewalls if they drop packets with IP optio
+ns
+      3    Like 1, but without support for sequence number randomization in server->client direction. Performance (flow/second) better than 1
+
+* simulate packets in pcap file
+./bp-sim-64-debug -f cap2/dns.yaml -v 3
+./bp-sim-64-debug -f cap2/dns.yaml -o my.erf
+
+* examples
+* simple http 1Gb/sec for 100 sec
+./t-rex-64 -f cap2/http_simple.yaml -m 100 -d 100
+* simple http 1Gb/sec with latency for 100 sec
+./t-rex-64 -f cap2/http_simple.yaml -m 100 -d 100 -l 1000
+* EMIX 35Gb/sec traffic
+./t-rex-64 -f avl/sfr_delay_10_1g.yaml -m 35 -d 100 -p
+* EMIX 20Gb/sec traffic with latency
+./t-rex-64 -f avl/sfr_delay_10_1g.yaml -m 20 -d 100 -l 1000
+* EMIX ipv6 20Gb/sec traffic with latency
+./t-rex-64 -f avl/sfr_delay_10_1g_no_bundeling.yaml -m 20 -d 100 -l 1000 --ipv6
+* simple http 1Gb/sec with NAT translation support
+./t-rex-64 -f cap2/http_simple.yaml -m 100 -d 100 -l 1000 --learn-mode 1
+
+* cap2/imix_64.yaml
+limit : 1000 generating 1000 flows from this type
+
+dual_port_mask : offset to add per port pair
+
+server_addr : "48.0.0.1"
+one_app_server : true
+
+* alternating MAC address by IP
+mac_override_by_ip:
+0 (false) - take the macs from port config/ARP query. this is default mode
+1 (true)  - replace only source MACs only in packets send by client
+2         - replace all macs in all directions
+
+* NAT support
+trex embed information describing which flow a packet belongs to
+
+* flow order/latency verification
+-l 100 --rx-check <sample>
+./t-rex-64 -f avl/sfr_delay_10_1g.yaml -c 4 -p -l 100 -d 100000 -m 30  --rx-check 128
+

@@ -1,0 +1,7 @@
+[Match]
+Name=enp5s0 enp6s0
+
+[Network]
+DHCP=no
+LLMNR=no
+MulticastDNS=no

@@ -1,0 +1,8 @@
+./ndr --stl --port 0 1 --max-iterations 10 -v --force-map --profile stl/udp_for_benchmarks.py --prof-tun packet_len=1518
+./ndr --stl --port 0 1 --max-iterations 10 -v --force-map --profile stl/udp_for_benchmarks.py --prof-tun packet_len=1518 --bi-dir
+
+====== n5105 i225 ======
+		1518 bytes			512 bytes			64 bytes
+		kpps	Mbps	CPU	LINE	kpps	Mbps	CPU	LINE	kpps	Mbps	CPU	LINE
+loopback	201	2440	0.84	99.02	 580	2380	2.53	98.73	3090	1580	12.16	83.17
+loopback bi-dir	402	4880	1.76	98.91	1160	4740	5.34	98.55	4960	2540	21.74	66.67

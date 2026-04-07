@@ -1,10 +1,16 @@
 kernel:
-  enable CONFIG_VFIO_PCI
+  CONFIG_VFIO_PCI=m
+  CONFIG_NUMA=y
+
+grub:
+  edit /etc/default/grub
+  GRUB_CMDLINE_LINUX="hugepagesz=1G hugepages=2"
 
 gentoo:
   emerge dev-python/pyelftools
   emerge sys-process/numactl
   emerge app-admin/sudo
+  emerge dev-python/legacy-cgi
 
 check network ports:
   ./usertools/dpdk-devbind.py --status

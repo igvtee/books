@@ -1,8 +1,14 @@
 ./ndr --stl --port 0 1 --max-iterations 10 -v --force-map --profile stl/udp_for_benchmarks.py --prof-tun packet_len=1518
 ./ndr --stl --port 0 1 --max-iterations 10 -v --force-map --profile stl/udp_for_benchmarks.py --prof-tun packet_len=1518 --bi-dir
 
-====== n5105 i225 ======
+====== n5105 with i225 at 2.5G ======
 		1518 bytes			512 bytes			64 bytes
 		kpps	Mbps	CPU	LINE	kpps	Mbps	CPU	LINE	kpps	Mbps	CPU	LINE
 loopback	201	2440	0.84	99.02	 580	2380	2.53	98.73	3090	1580	12.16	83.17
 loopback bi-dir	402	4880	1.76	98.91	1160	4740	5.34	98.55	4960	2540	21.74	66.67
+
+====== r7900x with x710 at 10G ======
+		1518 bytes			512 bytes			64 bytes
+		kpps	Mbps	CPU	LINE	kpps	Mbps	CPU	LINE	kpps	Mbps	CPU	LINE
+loopback	 812	9860	1.13	99.86	2280	 9330	5.57	96.9	14830	 7599	23.85	99.67
+loopback bi-dir	1630	19750	2.44	100	4720	19330	11.24	100	29680	15200	50.06	99.74

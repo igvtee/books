@@ -8,6 +8,13 @@ cp cfg/simple_cfg.yaml /etc/trex_cfg.yaml
 edit /etc/trex_cfg.yaml
 ./dpdk_setup_ports.py -c 01:00.0 01:00.1 -o /etc/trex_cfg.yaml
 
+# bridge case
+./dpdk_setup_ports.py -c 0000:2b:00.0 0000:2b:00.1 --dest-macs 9c:69:b4:61:c8:7b 9c:69:b4:61:c8:7a -o /etc/trex_cfg.yaml
+# router case
+./dpdk_setup_ports.py -c 0000:2b:00.0 0000:2b:00.1 --ips 192.168.10.20 192.168.10.21 --def-gws 192.168.10.21 192.168.10.20 -o /etc/trex_cfg.yaml
+
+# ./dpdk_nic_bind.py --bind=none 0000:2b:00.0 0000:2b:00.1
+
 ip link set enp1s0f0 down
 /dpdk_nic_bind.py --bind=vfio-pci 01:00.0 01:00.1
 ./dpdk_setup_ports.py

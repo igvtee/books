@@ -1,0 +1,1097 @@
+From c55e626beec04cc306d306c080a38c863f717c90 Mon Sep 17 00:00:00 2001
+From: Michael Lee <igvtee@gmail.com>
+Date: Sun, 18 Oct 2020 22:42:28 +0800
+Subject: [PATCH] add old mt7620 nand driver
+
+Signed-off-by: Michael Lee <igvtee@gmail.com>
+---
+ target/linux/ramips/dts/mt7620a.dtsi          |  26 +
+ .../ramips/dts/mt7620a_xiaomi_miwifi-mini.dts |  70 +-
+ target/linux/ramips/mt7620/config-4.14        |   7 +
+ target/linux/ramips/mt7620/target.mk          |   2 +-
+ .../0100-mt7620-nand-driver.patch             | 887 ++++++++++++++++++
+ 5 files changed, 989 insertions(+), 3 deletions(-)
+ create mode 100644 target/linux/ramips/patches-4.14/0100-mt7620-nand-driver.patch
+
+diff --git a/target/linux/ramips/dts/mt7620a.dtsi b/target/linux/ramips/dts/mt7620a.dtsi
+index 29d138c84e4584..fb9c184860168a 100644
+--- a/target/linux/ramips/dts/mt7620a.dtsi
++++ b/target/linux/ramips/dts/mt7620a.dtsi
+@@ -179,6 +179,25 @@
+ 			status = "disabled";
+ 		};
+ 
++		nand: nand@800 {
++			compatible = "mediatek,mt7620-nand";
++			reg = <0x800 0x100>;
++
++			resets = <&rstctrl 15>;
++			reset-names = "nand";
++
++			interrupt-parent = <&intc>;
++			interrupts = <8>;
++
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			pinctrl-names = "default";
++			pinctrl-0 = <&nand_pins>;
++
++			status = "disabled";
++		};
++
+ 		i2c: i2c@900 {
+ 			compatible = "ralink,rt2880-i2c";
+ 			reg = <0x900 0x100>;
+@@ -424,6 +443,13 @@
+ 				function = "sd";
+ 			};
+ 		};
++
++		nand_pins: nand {
++			nand {
++				groups = "nd_sd";
++				function = "nand";
++			};
++		};
+ 	};
+ 
+ 	rstctrl: rstctrl {
+diff --git a/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-mini.dts b/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-mini.dts
+index f3340b9f5e2a20..c6b154dc2fe749 100644
+--- a/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-mini.dts
++++ b/target/linux/ramips/dts/mt7620a_xiaomi_miwifi-mini.dts
+@@ -64,9 +64,75 @@
+ 	status = "okay";
+ };
+ 
+-&spi0 {
++&nand {
+ 	status = "okay";
+ 
++	partition@0 {
++		label = "Bootloader";
++		reg = <0x0 0x40000>;
++		read-only;
++	};
++
++	partition@40000 {
++		label = "Config";
++		reg = <0x40000 0x40000>;
++	};
++
++	partition@80000 {
++		label = "Bdata";
++		reg = <0x80000 0x40000>;
++		read-only;
++	};
++
++	factory: partition@0xc0000 {
++		label = "Factory";
++		reg = <0xc0000 0x40000>;
++		read-only;
++	};
++
++	partition@100000 {
++		label = "crash";
++		reg = <0x100000 0x40000>;
++		read-only;
++	};
++
++	partition@140000 {
++		label = "crash_syslog";
++		reg = <0x140000 0x40000>;
++		read-only;
++	};
++
++	partition@180000 {
++		label = "reserved0";
++		reg = <0x180000 0x80000>;
++	};
++
++	partition@200000 {
++		label = "kernel0_rsvd";
++		reg = <0x200000 0x400000>;
++	};
++
++	partition@600000 {
++		label = "kernel";
++		reg = <0x600000 0x400000>;
++	};
++
++	/* ubi partition is the result of squashing
++	 * next consequent stock partitions:
++	 * - rootfs0 (rootfs partition for stock kernel0),
++	 * - rootfs1 (rootfs partition for stock failsafe kernel1),
++	 * - overlay (used as ubi overlay in stock fw)
++	 * resulting 117,5MiB space for packages.
++	 */
++	partition@a00000 {
++		label = "ubi";
++		reg = <0xa00000 0x7600000>;
++	};
++};
++
++&spi0 {
++	//status = "okay";
++
+ 	flash@0 {
+ 		compatible = "jedec,spi-nor";
+ 		reg = <0>;
+@@ -88,7 +154,7 @@
+ 				read-only;
+ 			};
+ 
+-			factory: partition@40000 {
++			partition@40000 {
+ 				label = "factory";
+ 				reg = <0x40000 0x10000>;
+ 				read-only;
+diff --git a/target/linux/ramips/mt7620/config-4.14 b/target/linux/ramips/mt7620/config-4.14
+index 635b3c67f821e2..77a96c1ec3cb6a 100644
+--- a/target/linux/ramips/mt7620/config-4.14
++++ b/target/linux/ramips/mt7620/config-4.14
+@@ -41,6 +41,7 @@ CONFIG_CPU_MIPS32=y
+ # CONFIG_CPU_MIPS32_R1 is not set
+ CONFIG_CPU_MIPS32_R2=y
+ CONFIG_CPU_MIPSR2=y
++CONFIG_CPU_MIPSR2_IRQ_VI=y
+ CONFIG_CPU_NEEDS_NO_SMARTMIPS_OR_MICROMIPS=y
+ CONFIG_CPU_R4K_CACHE_TLB=y
+ CONFIG_CPU_R4K_FPU=y
+@@ -85,6 +86,7 @@ CONFIG_HAS_IOMEM=y
+ CONFIG_HAS_IOPORT_MAP=y
+ # CONFIG_HAVE_64BIT_ALIGNED_ACCESS is not set
+ # CONFIG_HAVE_ARCH_BITREVERSE is not set
++CONFIG_HAVE_ARCH_COMPILER_H=y
+ CONFIG_HAVE_ARCH_JUMP_LABEL=y
+ CONFIG_HAVE_ARCH_KGDB=y
+ CONFIG_HAVE_ARCH_SECCOMP_FILTER=y
+@@ -134,9 +136,11 @@ CONFIG_MARVELL_PHY=y
+ CONFIG_MDIO_BUS=y
+ CONFIG_MDIO_DEVICE=y
+ CONFIG_MFD_SYSCON=y
++CONFIG_MIGRATION=y
+ CONFIG_MIPS=y
+ CONFIG_MIPS_ASID_BITS=8
+ CONFIG_MIPS_ASID_SHIFT=0
++CONFIG_MIPS_CBPF_JIT=y
+ CONFIG_MIPS_CLOCK_VSYSCALL=y
+ # CONFIG_MIPS_CMDLINE_BUILTIN_EXTEND is not set
+ # CONFIG_MIPS_CMDLINE_DTB_EXTEND is not set
+@@ -154,6 +158,9 @@ CONFIG_MODULES_USE_ELF_REL=y
+ # CONFIG_MTD_CFI_INTELEXT is not set
+ CONFIG_MTD_CMDLINE_PARTS=y
+ CONFIG_MTD_M25P80=y
++CONFIG_MTD_NAND=y
++CONFIG_MTD_NAND_ECC=y
++CONFIG_MTD_NAND_MT7620=y
+ CONFIG_MTD_PHYSMAP=y
+ CONFIG_MTD_SPI_NOR=y
+ CONFIG_MTD_SPI_NOR_USE_4K_SECTORS=y
+diff --git a/target/linux/ramips/mt7620/target.mk b/target/linux/ramips/mt7620/target.mk
+index 56ceaee37fff7d..8d1b5400f6983b 100644
+--- a/target/linux/ramips/mt7620/target.mk
++++ b/target/linux/ramips/mt7620/target.mk
+@@ -4,7 +4,7 @@
+ 
+ SUBTARGET:=mt7620
+ BOARDNAME:=MT7620 based boards
+-FEATURES+=usb ramdisk
++FEATURES+=usb ramdisk nand
+ CPU_TYPE:=24kc
+ 
+ DEFAULT_PACKAGES += kmod-rt2800-soc wpad-basic swconfig
+diff --git a/target/linux/ramips/patches-4.14/0100-mt7620-nand-driver.patch b/target/linux/ramips/patches-4.14/0100-mt7620-nand-driver.patch
+new file mode 100644
+index 00000000000000..db303f06d2e712
+--- /dev/null
++++ b/target/linux/ramips/patches-4.14/0100-mt7620-nand-driver.patch
+@@ -0,0 +1,887 @@
++--- a/drivers/mtd/nand/Kconfig
+++++ b/drivers/mtd/nand/Kconfig
++@@ -569,4 +569,10 @@ config MTK_MTD_NAND
++ 	select MTD_NAND_IDS
++ 	select MTD_NAND_ECC
++ 
+++config MTD_NAND_MT7620
+++	tristate "Support for MTK MT7620 SoC NAND controller"
+++	depends on SOC_MT7620
+++	help
+++	  Enables support for NAND controller on MTK SoC MT7620.
+++
++ endif # MTD_NAND
++--- a/drivers/mtd/nand/Makefile
+++++ b/drivers/mtd/nand/Makefile
++@@ -61,6 +61,7 @@ obj-$(CONFIG_MTD_NAND_BRCMNAND)		+= brcm
++ obj-$(CONFIG_MTD_NAND_QCOM)		+= qcom_nandc.o
++ obj-$(CONFIG_MTD_NAND_MTK)		+= mtk_nand.o mtk_ecc.o
++ obj-$(CONFIG_MTK_MTD_NAND)		+= mtk_nand2.o bmt.o
+++obj-$(CONFIG_MTD_NAND_MT7620)		+= mt7620_nand.o
++ 
++ nand-objs := nand_base.o nand_bbt.o nand_timings.o nand_ids.o
++ nand-objs += nand_amd.o
++--- /dev/null
+++++ b/drivers/mtd/nand/mt7620_nand.c
++@@ -0,0 +1,861 @@
+++/*
+++ *  Copyright (C) 2009-2016, Michael Lee <igvtee@gmail.com>
+++ *  Ralink/MediaTek MT7620 SoC NAND controller driver
+++ *
+++ *  This program is free software; you can redistribute it and/or modify it
+++ *  under  the terms of the GNU General  Public License as published by the
+++ *  Free Software Foundation;  either version 2 of the License, or (at your
+++ *  option) any later version.
+++ */
+++
+++#include <linux/ioport.h>
+++#include <linux/kernel.h>
+++#include <linux/module.h>
+++#include <linux/platform_device.h>
+++#include <linux/slab.h>
+++#include <linux/mtd/mtd.h>
+++#include <linux/mtd/rawnand.h>
+++#include <linux/mtd/partitions.h>
+++#include <linux/reset.h>
+++#include <linux/delay.h>
+++#include <linux/mtd/nand_ecc.h>
+++
+++#define NAND_DRIVER_NAME "mt7620-nand"
+++#define RA_MAX_TIMEOUT_MS	1000
+++
+++#define RA_NAND_CTRL0		0x10
+++#define RA_NAND_TRANS_CFG	0x14
+++#define RA_NAND_CMD1		0x18
+++#define RA_NAND_CMD2		0x1c
+++#define RA_NAND_CMD3		0x20
+++#define RA_NAND_ADDR		0x24
+++#define RA_NAND_DATA		0x28
+++#define RA_NAND_STATUS		0x30
+++#define RA_NAND_INT_ENA		0x34
+++#define RA_NAND_INT_STA		0x38
+++#define RA_NAND_CTRL1		0x3c
+++#define RA_NAND_ECC1		0x40
+++#define RA_NAND_ECC2		0x44
+++#define RA_NAND_ECC3		0x48
+++#define RA_NAND_ECC4		0x4c
+++#define RA_NAND_ECC_ERR1	0x50
+++#define RA_NAND_ECC_ERR2	0x54
+++#define RA_NAND_ECC_ERR3	0x58
+++#define RA_NAND_ECC_ERR4	0x5c
+++#define RA_NAND_ADDR2		0x60
+++
+++/* RA_NAND_CTRL0 */
+++#define RA_CTRL0_TWAITB_OFFSET	16
+++#define RA_CTRL0_TWAITB_MASK	0xff
+++#define RA_CTRL0_THOLD_OFFSET	12
+++#define RA_CTRL0_THOLD_MASK	0xf
+++#define RA_CTRL0_TPERIOD_OFFSET	8
+++#define RA_CTRL0_TPERIOD_MASK	0xf
+++#define RA_CTRL0_TSETUP_OFFSET	4
+++#define RA_CTRL0_TSETUP_MASK	0xf
+++#define RA_CTRL0_BURST_OFFSET	2
+++#define RA_CTRL0_BURST_MAST	0x3
+++#define RA_CTRL0_DBUF_CLR	BIT(1)
+++#define RA_CTRL0_WP		BIT(0)
+++#define RA_CTRL0_TIME_DEFAULT	0xc82f20
+++#define RA_CTRL0_TIME_MASK	(0xfffff << RA_CTRL0_TSETUP_OFFSET)
+++
+++/* RA_NAND_TRANS_CFG */
+++#define RA_TCFG_DATA_OFFSET	20
+++#define RA_TCFG_ADDR_OFFSET	16
+++#define RA_TCFG_ADDR_MASK	0x7
+++#define RA_TCFG_CMD3_OFFSET	12
+++#define RA_TCFG_CMD2_OFFSET	10
+++#define RA_TCFG_CMD1_OFFSET	8
+++#define RA_TCFG_CMD_MASK	0x3
+++#define RA_TCFG_RESPB_DATA	BIT(7)
+++#define RA_TCFG_RESPB_ADDR	BIT(6)
+++#define RA_TCFG_RESPB_CMD3	BIT(5)
+++#define RA_TCFG_RESPB_CMD2	BIT(4)
+++#define RA_TCFG_ECC_EN		BIT(3)
+++#define RA_TCFG_DMA_EN		BIT(2)
+++#define RA_TCFG_WR_TRANS	BIT(1)
+++#define RA_TCFG_KICK_TRANS	BIT(0)
+++
+++/* RA_NAND_STATUS */
+++#define RA_STATUS_DEC_BYTE_OFFSET	8
+++#define RA_STATUS_DEC_BYTE_MASK	0x1ff
+++#define RA_STATUS_DEC_BIT_OFFSET	4
+++#define RA_STATUS_DEC_BIT_MASK	0x7
+++#define RA_STATUS_ND_READY	BIT(2)
+++#define RA_STATUS_DEC_ERR	BIT(1)
+++#define RA_STATUS_BUSY		BIT(0)
+++
+++/* RA_NAND_INT_ENA */
+++#define RA_INTENA_INT_OFFSET	0
+++#define RA_INTENA_INT_MASK	0xff
+++
+++/* RA_NAND_INT_STA */
+++#define RA_INTSTA_RX_START_EMPTY	BIT(7)
+++#define RA_INTSTA_TX_START_EMPTY	BIT(6)
+++#define RA_INTSTA_RX_COMPL_EMPTY	BIT(5)
+++#define RA_INTSTA_TX_COMPL_EMPTY	BIT(4)
+++#define RA_INTSTA_ECC_ERR	BIT(3)
+++#define RA_INTSTA_RX_READY	BIT(2)
+++#define RA_INTSTA_TX_READY	BIT(1)
+++#define RA_INTSTA_XFER_DONE	BIT(0)
+++#define RA_INTSTA_ERR_MASK	(RA_INTSTA_RX_START_EMPTY | \
+++		RA_INTSTA_TX_START_EMPTY | \
+++		RA_INTSTA_TX_COMPL_EMPTY | \
+++		RA_INTSTA_ECC_ERR)
+++
+++/* RA_NAND_CTRL1 */
+++#define RA_CTRL1_ECC_LOC3_OFFSET	16
+++#define RA_CTRL1_ECC_LOC2_OFFSET	12
+++#define RA_CTRL1_ECC_LOC1_OFFSET	8
+++#define RA_CTRL1_ECC_LOC_MASK	0xfff
+++#define RA_CTRL1_BYTE_SWAP	BIT(1)
+++#define RA_CTRL1_PAGE_2K	BIT(0)
+++
+++/* RA_NAND_ECC1 */
+++#define RA_ECC_MASK	0xffffff
+++
+++/* RA_NAND_ECC_ERR1 */
+++#define RA_ECCERR_BYTE_OFFSET	6
+++#define RA_ECCERR_BYTE_MASK	0x1ff
+++#define RA_ECCERR_BIT_OFFSET	2
+++#define RA_ECCERR_BIT_MASK	0x7
+++#define RA_ECCERR_FAIL	BIT(0)
+++
+++struct mt7620_nand {
+++	struct nand_hw_control controller;
+++	struct nand_chip chip;
+++	struct device *dev;
+++	void __iomem *base;
+++	struct resource *mem;
+++	u32 buffer;
+++	int offset;
+++};
+++
+++struct mt7620_nand_cmd {
+++	u32 cmd1;
+++	u32 cmd2;
+++	u32 cmd3;
+++	u32 addr1;
+++	u32 addr2;
+++	u32 conf;
+++};
+++
+++static int mt7620_nfc_ooblayout_free(struct mtd_info *mtd, int section,
+++				  struct mtd_oob_region *oob_region)
+++{
+++	struct nand_chip *chip = mtd_to_nand(mtd);
+++
+++	if (section > chip->ecc.steps)
+++		return -ERANGE;
+++
+++	if (section == 0) {
+++		oob_region->offset = 1;
+++		oob_region->length = 5;
+++	} else if (section == chip->ecc.steps) {
+++		oob_region->offset = 9 + 16 * (section - 1);
+++		oob_region->length = mtd->oobsize - oob_region->offset;
+++	} else {
+++		oob_region->offset = 9 + 16 * (section - 1);
+++		oob_region->length = 13;
+++	}
+++
+++	return 0;
+++}
+++
+++static int mt7620_nfc_ooblayout_ecc(struct mtd_info *mtd, int section,
+++				 struct mtd_oob_region *oob_region)
+++{
+++	struct nand_chip *chip = mtd_to_nand(mtd);
+++
+++	if (section >= chip->ecc.steps)
+++		return -ERANGE;
+++
+++	oob_region->offset = 6 + section * 16;
+++	oob_region->length = 3;
+++
+++	return 0;
+++}
+++
+++static const struct mtd_ooblayout_ops mt7620_nfc_ooblayout_ops = {
+++	.free = mt7620_nfc_ooblayout_free,
+++	.ecc = mt7620_nfc_ooblayout_ecc,
+++};
+++
+++static void mt7620_namd_dump(struct mt7620_nand *nand)
+++{
+++	dev_dbg(nand->dev, "ctrl0: %08x, cfg: %08x, cmd1: %08x, cmd2: %08x, " \
+++			"cmd3: %08x, addr: %08x, data: %08x, status: %08x, " \
+++			"intena: %08x, intsta: %08x, ctrl1: %08x, " \
+++			"ecc1: %08x, ecc2: %08x, ecc3: %08x, ecc4: %08x, " \
+++			"eccerr1: %08x, eccerr2: %08x, eccerr3: %08x, " \
+++			"eccerr4: %08x, addr2: %08x\n",
+++			readl(nand->base + RA_NAND_CTRL0),
+++			readl(nand->base + RA_NAND_TRANS_CFG),
+++			readl(nand->base + RA_NAND_CMD1),
+++			readl(nand->base + RA_NAND_CMD2),
+++			readl(nand->base + RA_NAND_CMD3),
+++			readl(nand->base + RA_NAND_ADDR),
+++			readl(nand->base + RA_NAND_DATA),
+++			readl(nand->base + RA_NAND_STATUS),
+++			readl(nand->base + RA_NAND_INT_ENA),
+++			readl(nand->base + RA_NAND_INT_STA),
+++			readl(nand->base + RA_NAND_CTRL1),
+++			readl(nand->base + RA_NAND_ECC1),
+++			readl(nand->base + RA_NAND_ECC2),
+++			readl(nand->base + RA_NAND_ECC3),
+++			readl(nand->base + RA_NAND_ECC4),
+++			readl(nand->base + RA_NAND_ECC_ERR1),
+++			readl(nand->base + RA_NAND_ECC_ERR2),
+++			readl(nand->base + RA_NAND_ECC_ERR3),
+++			readl(nand->base + RA_NAND_ECC_ERR4),
+++			readl(nand->base + RA_NAND_ADDR2));
+++};
+++
+++static inline struct mt7620_nand *mtd_to_mt7620_nand(struct mtd_info *mtd)
+++{
+++	return nand_get_controller_data(mtd_to_nand(mtd));
+++}
+++
+++static void mt7620_nand_write_buf(struct mtd_info *mtd, const uint8_t *buf,
+++		int len)
+++{
+++	struct mt7620_nand *nand = mtd_to_mt7620_nand(mtd);
+++	unsigned long timeo;
+++	u32 status, data;
+++	u32 *p = (u32 *)buf;
+++
+++	timeo = jiffies + msecs_to_jiffies(RA_MAX_TIMEOUT_MS);
+++	do {
+++		status = readl(nand->base + RA_NAND_INT_STA);
+++		if (status & RA_INTSTA_TX_READY) {
+++			if (likely(len >= 4)) {
+++				writel(RA_INTSTA_TX_READY, nand->base +
+++						RA_NAND_INT_STA);
+++				wmb();
+++				writel(*p++, nand->base + RA_NAND_DATA);
+++				len -= 4;
+++			} else if (len > 0) {
+++				data = 0xffffffff;
+++				memcpy(&data, p, len);
+++				writel(RA_INTSTA_TX_READY, nand->base +
+++						RA_NAND_INT_STA);
+++				wmb();
+++				writel(data, nand->base + RA_NAND_DATA);
+++				len = 0;
+++			} else
+++				goto xfer_done;
+++		} else if (status & RA_INTSTA_XFER_DONE)
+++			goto xfer_done;
+++
+++		cpu_relax();
+++	} while (time_before(jiffies, timeo));
+++
+++	dev_err(nand->dev, "timeout %d bytes not write\n", len);
+++	return;
+++
+++xfer_done:
+++	if (len > 0) {
+++		dev_dbg(nand->dev, "transfer done with %d bytes not write\n",
+++				len);
+++	}
+++}
+++
+++static void mt7620_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
+++{
+++	struct mt7620_nand *nand = mtd_to_mt7620_nand(mtd);
+++	unsigned long timeo;
+++	u32 status, data;
+++	u32 *p = (u32 *)buf;
+++
+++	timeo = jiffies + msecs_to_jiffies(RA_MAX_TIMEOUT_MS);
+++	do {
+++		status = readl(nand->base + RA_NAND_INT_STA);
+++		if (status & RA_INTSTA_RX_READY) {
+++			if (likely(len >= 4)) {
+++				*p++ = readl(nand->base + RA_NAND_DATA);
+++				rmb();
+++				writel(RA_INTSTA_RX_READY, nand->base +
+++						RA_NAND_INT_STA);
+++				len -= 4;
+++			} else if (len > 0) {
+++				data = readl(nand->base + RA_NAND_DATA);
+++				rmb();
+++				writel(RA_INTSTA_RX_READY, nand->base +
+++						RA_NAND_INT_STA);
+++				memcpy(p, &data, len);
+++				len = 0;
+++			} else
+++				goto xfer_done;
+++		} else if (status & RA_INTSTA_XFER_DONE)
+++			goto xfer_done;
+++
+++		cpu_relax();
+++	} while (time_before(jiffies, timeo));
+++
+++	dev_err(nand->dev, "timeout %d bytes not read\n", len);
+++	return;
+++
+++xfer_done:
+++	if (len > 0) {
+++		memset(p, 0xff, len);
+++		dev_dbg(nand->dev, "transfer done with %d bytes not read\n",
+++				len);
+++	}
+++}
+++
+++static uint8_t mt7620_nand_read_byte(struct mtd_info *mtd)
+++{
+++	struct mt7620_nand *nand = mtd_to_mt7620_nand(mtd);
+++	uint8_t *ret = (uint8_t *)&nand->buffer;
+++
+++	if (nand->offset == 0)
+++		mt7620_nand_read_buf(mtd, ret, 4);
+++	else
+++		ret += nand->offset;
+++
+++	nand->offset = (nand->offset + 1) & 0x3;
+++
+++	return *ret;
+++}
+++
+++static u16 mt7620_nand_read_word(struct mtd_info *mtd)
+++{
+++	struct nand_chip *chip = mtd_to_nand(mtd);
+++
+++	return chip->read_byte(mtd) | (chip->read_byte(mtd) << 8);
+++}
+++
+++static void mt7620_nand_select_chip(struct mtd_info *mtd, int chipnr)
+++{
+++        switch (chipnr) {
+++        case -1:
+++        case 0:
+++                break;
+++
+++        default:
+++                BUG();
+++        }
+++}
+++
+++static void mt7620_nand_cmd_ctrl(struct mtd_info *mtd, int dat,
+++		unsigned int ctrl)
+++{
+++	BUG();
+++}
+++
+++static int mt7620_nand_dev_ready(struct mtd_info *mtd)
+++{
+++	struct mt7620_nand *nand = mtd_to_mt7620_nand(mtd);
+++
+++	return (readl(nand->base + RA_NAND_STATUS) & RA_STATUS_ND_READY);
+++}
+++
+++static void mt7620_nand_clear_data(struct mt7620_nand *nand)
+++{
+++	unsigned long timeo;
+++	u32 reg;
+++
+++	/* clean read offset */
+++	nand->offset = 0;
+++
+++	/*
+++	 * read out all data. prevent old data for next operation.
+++	 * it will cause next read ecc error.
+++	 */
+++	reg = readl(nand->base + RA_NAND_INT_STA);
+++	if ((reg & (RA_INTSTA_RX_READY | RA_INTSTA_XFER_DONE)) ==
+++			RA_INTSTA_RX_READY) {
+++		timeo = jiffies + msecs_to_jiffies(RA_MAX_TIMEOUT_MS);
+++		do {
+++			reg = readl(nand->base + RA_NAND_INT_STA);
+++			if (reg & RA_INTSTA_RX_READY) {
+++				readl(nand->base + RA_NAND_DATA);
+++				writel(RA_INTSTA_RX_READY, nand->base +
+++						RA_NAND_INT_STA);
+++			} else if (reg & RA_INTSTA_XFER_DONE)
+++				break;
+++
+++			cpu_relax();
+++		} while (time_before(jiffies, timeo));
+++	}
+++
+++	/* controller/flash ready */
+++	timeo = jiffies + msecs_to_jiffies(RA_MAX_TIMEOUT_MS);
+++	do {
+++		reg = readl(nand->base + RA_NAND_STATUS);
+++		if (!(reg & RA_STATUS_BUSY) && (reg & RA_STATUS_ND_READY))
+++			goto ctrl_ready;
+++	} while (time_before(jiffies, timeo));
+++	dev_err(nand->dev, "controller/flash not ready %08x\n", reg);
+++
+++ctrl_ready:
+++	/* clear data buffer */
+++	reg = readl(nand->base + RA_NAND_CTRL0);
+++	reg |= RA_CTRL0_DBUF_CLR;
+++	writel(reg, nand->base + RA_NAND_CTRL0);
+++	reg &= ~RA_CTRL0_DBUF_CLR;
+++	writel(reg, nand->base + RA_NAND_CTRL0);
+++
+++	/* clear interrupt status */
+++	reg = readl(nand->base + RA_NAND_INT_STA);
+++	writel(reg, nand->base + RA_NAND_INT_STA);
+++	if (reg & RA_INTSTA_ERR_MASK) {
+++		dev_dbg(nand->dev, "status err %08x\n", reg);
+++	}
+++	timeo = jiffies + msecs_to_jiffies(RA_MAX_TIMEOUT_MS);
+++	do {
+++		reg = readl(nand->base + RA_NAND_INT_STA);
+++		if (reg == RA_INTSTA_TX_READY)
+++			goto clear_done;
+++	} while (time_before(jiffies, timeo));
+++	dev_err(nand->dev, "clean buffer fail %08x\n", reg);
+++
+++clear_done:
+++	return;
+++}
+++
+++static void mt7620_nand_do_cmd(struct mt7620_nand *nand,
+++		struct mt7620_nand_cmd *cmd)
+++{
+++	mt7620_nand_clear_data(nand);
+++
+++	/* setup command and address */
+++	writel(cmd->cmd1, nand->base + RA_NAND_CMD1);
+++	writel(cmd->cmd2, nand->base + RA_NAND_CMD2);
+++	writel(cmd->cmd3, nand->base + RA_NAND_CMD3);
+++	writel(cmd->addr1, nand->base + RA_NAND_ADDR);
+++	writel(cmd->addr2, nand->base + RA_NAND_ADDR2);
+++
+++	/* make sure all things is done */
+++	mb();
+++	writel(cmd->conf, nand->base + RA_NAND_TRANS_CFG);
+++}
+++
+++static void mt7620_nand_xfer_done(struct mt7620_nand *nand)
+++{
+++	unsigned long timeo;
+++	u32 status;
+++
+++	timeo = jiffies + msecs_to_jiffies(RA_MAX_TIMEOUT_MS);
+++	do {
+++		status = readl(nand->base + RA_NAND_INT_STA);
+++		if (status & RA_INTSTA_XFER_DONE)
+++			return;
+++
+++		cpu_relax();
+++	} while (time_before(jiffies, timeo));
+++
+++	dev_err(nand->dev, "write transfer not done\n");
+++}
+++
+++static void mt7620_nand_command(struct mtd_info *mtd, unsigned int command,
+++		int column, int page_addr)
+++{
+++	struct mt7620_nand *nand = mtd_to_mt7620_nand(mtd);
+++	struct nand_chip *chip = mtd_to_nand(mtd);
+++	struct mt7620_nand_cmd cmd;
+++	u32 addr_num, data_num;
+++
+++	memset(&cmd, 0, sizeof(cmd));
+++	cmd.conf = RA_TCFG_KICK_TRANS;
+++
+++	/* Emulate NAND_CMD_READOOB */
+++	if (command == NAND_CMD_READOOB) {
+++		column += mtd->writesize;
+++		command = NAND_CMD_READ0;
+++	}
+++	cmd.cmd1 = command;
+++
+++	addr_num = data_num = 0;
+++	if (column != -1 || page_addr != -1) {
+++		data_num = mtd->writesize + mtd->oobsize;
+++
+++		/* Serially input address */
+++		if (column != -1) {
+++			cmd.addr1 |= column & 0xffff;
+++			addr_num += 2;
+++			data_num -= column;
+++		}
+++
+++		if (page_addr != -1) {
+++			cmd.addr1 |= (page_addr << (addr_num * 8));
+++			addr_num += 2;
+++			/* One more address cycle for devices > 128MiB */
+++			if (chip->chipsize > (128 << 20)) {
+++				if (addr_num == 4)
+++					cmd.addr2 = page_addr >> 16;
+++				addr_num += 1;
+++			}
+++		}
+++	}
+++
+++	/*
+++	 * Program and erase have their own busy handlers status, sequential
+++	 * in and status need no delay.
+++	 */
+++	switch (command) {
+++
+++	case NAND_CMD_PAGEPROG:
+++		mt7620_nand_xfer_done(nand);
+++	case NAND_CMD_ERASE2:
+++		return;
+++
+++	case NAND_CMD_ERASE1:
+++		cmd.cmd2 = NAND_CMD_ERASE2;
+++		cmd.conf |= (0x1 << RA_TCFG_CMD1_OFFSET) |
+++			(0x1 << RA_TCFG_CMD2_OFFSET) |
+++			RA_TCFG_RESPB_CMD2;
+++		data_num = 0;
+++		goto do_cmd;
+++
+++	case NAND_CMD_STATUS:
+++		cmd.conf |= (0x1 << RA_TCFG_CMD1_OFFSET);
+++		data_num = 1;
+++		goto do_cmd;
+++
+++	case NAND_CMD_SEQIN:
+++	case NAND_CMD_RNDIN:
+++		cmd.cmd3 = NAND_CMD_PAGEPROG;
+++		cmd.conf |= (0x1 << RA_TCFG_CMD1_OFFSET) |
+++			(0x1 << RA_TCFG_CMD3_OFFSET) |
+++			RA_TCFG_RESPB_CMD3 |
+++			RA_TCFG_WR_TRANS;
+++		goto do_cmd;
+++
+++        case NAND_CMD_RNDOUT:
+++		cmd.cmd2 = NAND_CMD_RNDOUTSTART;
+++		cmd.conf |= (0x1 << RA_TCFG_CMD1_OFFSET) |
+++			(0x1 << RA_TCFG_CMD2_OFFSET);
+++		goto do_cmd;
+++
+++	case NAND_CMD_READID:
+++		cmd.conf |= (0x1 << RA_TCFG_CMD1_OFFSET);
+++		addr_num = 1;
+++		if (column == 0x20)
+++			data_num = 4;
+++		else
+++			data_num = 8;
+++		goto do_cmd;
+++
+++	case NAND_CMD_RESET:
+++		cmd.cmd2 = command;
+++		cmd.conf |= (0x1 << RA_TCFG_CMD2_OFFSET) | RA_TCFG_RESPB_CMD2;
+++		break;
+++
+++	case NAND_CMD_PARAM:
+++		cmd.conf |= (0x1 << RA_TCFG_CMD1_OFFSET) |
+++			RA_TCFG_RESPB_ADDR;
+++		addr_num = 1;
+++		if (column == 0x0)
+++			data_num = 256 * 3;
+++		else if (column == 0x40)
+++			data_num = 512 * 3;
+++		break;
+++
+++	case NAND_CMD_READ0:
+++		cmd.cmd2 = NAND_CMD_READSTART;
+++		cmd.conf |= (0x1 << RA_TCFG_CMD1_OFFSET) |
+++			(0x1 << RA_TCFG_CMD2_OFFSET) |
+++			RA_TCFG_RESPB_CMD2;
+++		/* TODO: maybe need better way to enable ecc */
+++		if (column == 0)
+++			cmd.conf |= RA_TCFG_ECC_EN;
+++		break;
+++
+++	default:
+++		dev_err(nand->dev, "unknown command %02x\n", command);
+++		return;
+++	}
+++
+++	cmd.conf |= (data_num << RA_TCFG_DATA_OFFSET) |
+++		(addr_num << RA_TCFG_ADDR_OFFSET);
+++	mt7620_nand_do_cmd(nand, &cmd);
+++
+++	/*
+++	 * Apply this short delay always to ensure that we do wait tWB in
+++	 * any case on any machine.
+++	 */
+++	ndelay(100);
+++
+++	nand_wait_ready(mtd);
+++	return;
+++
+++do_cmd:
+++	cmd.conf |= (data_num << RA_TCFG_DATA_OFFSET) |
+++		(addr_num << RA_TCFG_ADDR_OFFSET);
+++	mt7620_nand_do_cmd(nand, &cmd);
+++}
+++
+++static void mt7620_nand_hwctl(struct mtd_info *mtd, int mode)
+++{
+++	struct mt7620_nand *nand = mtd_to_mt7620_nand(mtd);
+++	u32 reg;
+++
+++	if (mode == NAND_ECC_READ) {
+++		/* check ecc enable */
+++		reg = readl(nand->base + RA_NAND_TRANS_CFG);
+++		if (!(reg & RA_TCFG_ECC_EN))
+++			dev_err(nand->dev, "hw ecc not enable\n");
+++	} else {
+++		reg = readl(nand->base + RA_NAND_TRANS_CFG);
+++		reg |= RA_TCFG_ECC_EN;
+++		writel(reg, nand->base + RA_NAND_TRANS_CFG);
+++	}
+++}
+++
+++static int mt7620_nand_calculate(struct mtd_info *mtd, const uint8_t *dat,
+++		uint8_t *ecc_code)
+++{
+++	struct mt7620_nand *nand = mtd_to_mt7620_nand(mtd);
+++	struct nand_chip *chip = mtd_to_nand(mtd);
+++	int eccbytes = chip->ecc.bytes;
+++	u32 reg[4];
+++	int i, j;
+++
+++	reg[0] = readl(nand->base + RA_NAND_ECC1);
+++	reg[1] = readl(nand->base + RA_NAND_ECC2);
+++	reg[2] = readl(nand->base + RA_NAND_ECC3);
+++	reg[3] = readl(nand->base + RA_NAND_ECC4);
+++
+++	for (i = 0, j = 0; j < chip->ecc.steps; i += eccbytes, j++)
+++		memcpy(&ecc_code[i], &reg[j], eccbytes);
+++
+++	return 0;
+++}
+++
+++static int mt7620_nand_read_page(struct mtd_info *mtd, struct nand_chip *chip,
+++		uint8_t *buf, int oob_required, int page)
+++{
+++	struct mt7620_nand *nand = mtd_to_mt7620_nand(mtd);
+++	int i, eccsize = chip->ecc.size;
+++	int eccbytes = chip->ecc.bytes;
+++	int eccsteps = chip->ecc.steps;
+++	int ret;
+++	uint8_t *p = buf;
+++	uint8_t *ecc_calc = chip->buffers->ecccalc;
+++	uint8_t *ecc_code = chip->buffers->ecccode;
+++	unsigned int max_bitflips = 0;
+++
+++	chip->ecc.hwctl(mtd, NAND_ECC_READ);
+++	chip->read_buf(mtd, p, mtd->writesize);
+++	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
+++	chip->ecc.calculate(mtd, p, ecc_calc);
+++
+++	ret = mtd_ooblayout_get_eccbytes(mtd, ecc_code, chip->oob_poi, 0,
+++					 chip->ecc.total);
+++	if (ret)
+++		return ret;
+++
+++	eccsteps = chip->ecc.steps;
+++	p = buf;
+++
+++	/* empty block ecc_calc is 0x0, but ecc_code is 0xff */
+++	for (i = 0; i < eccsteps * eccbytes; i++) {
+++		if (ecc_code[i] != 0xff)
+++			break;
+++		if (ecc_calc[i] != 0x0)
+++			break;
+++	}
+++	if (i == (eccsteps * eccbytes)) {
+++		/* clear ecc err status */
+++		writel(RA_INTSTA_ECC_ERR, nand->base + RA_NAND_INT_STA);
+++		return max_bitflips;
+++	}
+++
+++	for (i = 0 ; eccsteps; eccsteps--, i += eccbytes, p += eccsize) {
+++		int stat;
+++
+++		stat = chip->ecc.correct(mtd, p, &ecc_code[i], &ecc_calc[i]);
+++		if (stat < 0) {
+++			mtd->ecc_stats.failed++;
+++		} else {
+++			mtd->ecc_stats.corrected += stat;
+++			max_bitflips = max_t(unsigned int, max_bitflips, stat);
+++		}
+++	}
+++
+++	return max_bitflips;
+++}
+++
+++static int mt7620_nand_write_page(struct mtd_info *mtd, struct nand_chip *chip,
+++		const uint8_t *buf, int oob_required,
+++		int page)
+++{
+++	int ret;
+++	uint8_t *ecc_calc = chip->buffers->ecccalc;
+++
+++	chip->ecc.hwctl(mtd, NAND_ECC_WRITE);
+++	chip->write_buf(mtd, buf, mtd->writesize);
+++	chip->ecc.calculate(mtd, buf, ecc_calc);
+++
+++	ret = mtd_ooblayout_set_eccbytes(mtd, ecc_calc, chip->oob_poi, 0,
+++					 chip->ecc.total);
+++	if (ret)
+++		return ret;
+++
+++	chip->write_buf(mtd, chip->oob_poi, mtd->oobsize);
+++
+++	return 0;
+++}
+++
+++static void mt7620_nand_wp_enable(struct mt7620_nand *nand)
+++{
+++	u32 reg;
+++
+++	reg = readl(nand->base + RA_NAND_CTRL0);
+++	reg &= ~RA_CTRL0_WP;
+++	writel(reg, nand->base + RA_NAND_CTRL0);
+++}
+++
+++static void mt7620_nand_hw_init(struct mt7620_nand *nand,
+++		struct nand_ecc_ctrl *ecc)
+++{
+++	u32 reg;
+++
+++	/* save time settings before reset */
+++	reg = readl(nand->base + RA_NAND_CTRL0) & RA_CTRL0_TIME_MASK;
+++
+++	device_reset(nand->dev);
+++
+++	/* TODO: set time setting according to flash spec */
+++	if (!reg)
+++		reg = RA_CTRL0_TIME_DEFAULT;
+++	/* set WP pin to high. disable write protect */
+++	reg |= RA_CTRL0_WP;
+++	writel(reg, nand->base + RA_NAND_CTRL0);
+++
+++	/* disable interrupt */
+++	writel(0x0, nand->base + RA_NAND_INT_ENA);
+++
+++	/* setup ecc offset in oob */
+++	reg = (0x6 << RA_CTRL1_ECC_LOC1_OFFSET) |
+++		(0x7 << RA_CTRL1_ECC_LOC2_OFFSET) |
+++		(0x8 << RA_CTRL1_ECC_LOC3_OFFSET) |
+++		RA_CTRL1_PAGE_2K;
+++	writel(reg, nand->base + RA_NAND_CTRL1);
+++
+++	mt7620_namd_dump(nand);
+++}
+++
+++static int mt7620_nand_probe(struct platform_device *pdev)
+++{
+++	struct device *dev = &pdev->dev;
+++	struct mt7620_nand *nand;
+++	struct resource *res;
+++	struct nand_chip *chip;
+++	struct nand_ecc_ctrl *ecc;
+++	struct mtd_info *mtd;
+++	int ret;
+++
+++	nand = devm_kzalloc(dev, sizeof(*nand), GFP_KERNEL);
+++	if (!nand) {
+++		dev_err(dev, "failed to allocate memory\n");
+++		return -ENOMEM;
+++	}
+++
+++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+++	nand->base = devm_ioremap_resource(dev, res);
+++	if (IS_ERR(nand->base))
+++		return PTR_ERR(nand->base);
+++
+++	nand_hw_control_init(&nand->controller);
+++	nand->dev = dev;
+++	chip = &nand->chip;
+++	ecc = &chip->ecc;
+++
+++	mtd = nand_to_mtd(chip);
+++	mtd->owner = THIS_MODULE;
+++	mtd->dev.parent = dev;
+++	mtd->name = NAND_DRIVER_NAME;
+++	mtd_set_ooblayout(mtd, &mt7620_nfc_ooblayout_ops);
+++
+++	chip->controller = &nand->controller;
+++	nand_set_controller_data(chip, (void *)nand);
+++	nand_set_flash_node(chip, dev->of_node);
+++
+++	chip->read_byte = mt7620_nand_read_byte;
+++	chip->read_word = mt7620_nand_read_word;
+++	chip->write_buf = mt7620_nand_write_buf;
+++	chip->read_buf = mt7620_nand_read_buf;
+++	chip->select_chip = mt7620_nand_select_chip;
+++	chip->cmd_ctrl = mt7620_nand_cmd_ctrl;
+++	chip->dev_ready = mt7620_nand_dev_ready;
+++	chip->cmdfunc = mt7620_nand_command;
+++	chip->options = NAND_NO_SUBPAGE_WRITE;
+++
+++	ecc->mode = NAND_ECC_HW;
+++	ecc->size = 512;
+++	ecc->bytes = 3;
+++	ecc->strength = 1;
+++	ecc->hwctl = mt7620_nand_hwctl;
+++	ecc->calculate = mt7620_nand_calculate;
+++	ecc->correct = nand_correct_data;
+++	ecc->read_page = mt7620_nand_read_page;
+++	ecc->write_page = mt7620_nand_write_page;
+++
+++	mt7620_nand_hw_init(nand, ecc);
+++
+++	ret = nand_scan(mtd, 1);
+++	if (ret)
+++		goto err;
+++
+++	if (mtd->oobsize != 64 && mtd->oobsize != 128) {
+++		dev_err(dev, "unsupport oob size %d\n", mtd->oobsize);
+++		ret = -EINVAL;
+++		goto err_release;
+++	}
+++	if (mtd->writesize != 2048) {
+++		dev_err(dev, "unsupport page size %d\n",
+++				mtd->writesize);
+++		ret = -EINVAL;
+++		goto err_release;
+++	}
+++
+++	ret = mtd_device_register(mtd, NULL, 0);
+++
+++	platform_set_drvdata(pdev, nand);
+++	if (ret) {
+++		dev_err(dev, "Failed to register MTD: %d\n", ret);
+++		goto err_release;
+++	}
+++
+++err:
+++	return ret;
+++
+++err_release:
+++	nand_release(mtd);
+++
+++	return ret;
+++}
+++
+++static int mt7620_nand_remove(struct platform_device *pdev)
+++{
+++	struct mt7620_nand *nand = platform_get_drvdata(pdev);
+++
+++	nand_release(nand_to_mtd(&nand->chip));
+++
+++	mt7620_nand_clear_data(nand);
+++	mt7620_nand_wp_enable(nand);
+++
+++	return 0;
+++}
+++
+++static const struct of_device_id mt7620_nand_ids[] = {
+++	{ .compatible = "mediatek,mt7620-nand" },
+++};
+++MODULE_DEVICE_TABLE(of, mt7620_nand_ids);
+++
+++static struct platform_driver mt7620_nand_driver = {
+++	.probe = mt7620_nand_probe,
+++	.remove = mt7620_nand_remove,
+++	.driver = {
+++		.name = NAND_DRIVER_NAME,
+++		.of_match_table = mt7620_nand_ids,
+++	},
+++};
+++module_platform_driver(mt7620_nand_driver);
+++
+++MODULE_LICENSE("GPL");
+++MODULE_AUTHOR("Michael Lee <igvtee@gmail.com>");
+++MODULE_DESCRIPTION("NAND controller driver for Ralink/MediaTek MT7620 SoC");

@@ -1,0 +1,2 @@
+edit ixgbe_main.c find "remove NBASE-T speeds from default autonegotiation" and
+comment the code

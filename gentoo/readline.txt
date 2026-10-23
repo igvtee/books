@@ -1,0 +1,18 @@
+C : Ctrl
+M : Alt
+
+C-a : Move to the start of the line (Home)
+C-e : Move to the end of the line (End)
+M-f : Move forward a word
+M-b : Move backward a word
+C-l : Clear the screen
+
+C-u : Kill backward from the cursor to the beginning of the current line
+C-k : Kill the text from the current cursor position to the end of the line
+M-d : Kill from the cursor to the end of the current word
+C-w : Kill from the cursor to the previous whitespace
+C-y : Yank the most recently killed text back into the buffer at the cursor
+
+M-1 0 C-d : give the C-d command an argument of 10
+
+C-r : search backward in the history for a particular string
